@@ -836,7 +836,12 @@ document.getElementById('brightnessSlider').oninput = (e) => {
 
 function updateVolume(data) {
   if (!data) return;
-  if (data.volume >= 0) { document.getElementById('volumeSlider').value = data.volume; document.getElementById('volumeLabel').textContent = data.volume; }
+  if (typeof data.volume === 'number' && data.volume >= 0) {
+    document.getElementById('volumeSlider').value = data.volume;
+    document.getElementById('volumeLabel').textContent = data.volume;
+  } else {
+    document.getElementById('volumeLabel').textContent = 'N/D';
+  }
   const btn = document.getElementById('muteBtn');
   btn.textContent = data.muted ? 'Riattiva' : 'Muto';
   btn.onclick = () => { haptic(); wsSend({ type: 'setMute', muted: !data.muted }); };
@@ -845,8 +850,12 @@ function updateVolume(data) {
 
 function updateBrightness(data) {
   if (!data) return;
-  if (data.brightness >= 0) { document.getElementById('brightnessSlider').value = data.brightness; document.getElementById('brightnessLabel').textContent = data.brightness; }
-  if (data.error && data.brightness < 0) document.getElementById('brightnessLabel').textContent = 'N/A';
+  if (typeof data.brightness === 'number' && data.brightness >= 0) {
+    document.getElementById('brightnessSlider').value = data.brightness;
+    document.getElementById('brightnessLabel').textContent = data.brightness;
+  } else {
+    document.getElementById('brightnessLabel').textContent = 'N/D';
+  }
 }
 
 document.getElementById('btnLock').onclick = () => { haptic(); dangerAction('lock', 'Blocca PC', 'Il PC verrà bloccato.'); };
