@@ -1,0 +1,19 @@
+{
+  "name": "vampjro-remote-control-center",
+  "version": "1.0.0",
+  "description": "VAMPJRO Remote Control Center — Control and monitor your PC from your iPhone",
+  "main": "src/server/index.js",
+  "scripts": {
+    "start": "node --max-old-space-size=128 src/server/index.js",
+    "dev": "node src/server/index.js",
+    "build": "node build/scripts/build-installer.js"
+  },
+  "author": "VAMPJRO",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0",
+    "systeminformation": "^5.23.0"
+  }
+}

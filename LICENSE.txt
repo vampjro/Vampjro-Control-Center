@@ -1,0 +1,8 @@
+VAMPJRO Remote Control Center
+Copyright (c) 2024–2026 VAMPJRO. All rights reserved.
+
+This software is proprietary. Unauthorized copying, modification,
+distribution, or use of this software, in whole or in part, is
+strictly prohibited without prior written permission from VAMPJRO.
+
+For support: https://t.me/vampjro

@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="/manifest.json">
+<title>VAMPJRO</title>
+<style>
+:root {
+  --bg: #000; --bg1: #0a0a0a; --bg2: #111113; --bg3: #18181b; --bg4: #1e1e21;
+  --border: rgba(255,255,255,.06); --border2: rgba(255,255,255,.10);
+  --text: #f4f4f5; --text2: #a1a1aa; --text3: #71717a; --text4: #52525b;
+  --accent: #6366f1; --accent2: #818cf8; --accentBg: rgba(99,102,241,.10);
+  --red: #ef4444; --redBg: rgba(239,68,68,.10);
+  --green: #22c55e; --greenBg: rgba(34,197,94,.10);
+  --yellow: #eab308; --yellowBg: rgba(234,179,8,.10);
+  --orange: #f97316; --orangeBg: rgba(249,115,22,.10);
+  --safe: env(safe-area-inset-bottom, 0px);
+  --safeT: env(safe-area-inset-top, 0px);
+  --radius: 12px; --radius-sm: 8px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; -webkit-user-select:none; user-select:none; -webkit-font-smoothing:antialiased; }
+input,textarea { -webkit-user-select:text; user-select:text; }
+
+#app { min-height:100dvh; padding-bottom:calc(60px + var(--safe)); }
+.page { display:none; padding:16px; padding-top:calc(var(--safeT) + 12px); max-width:600px; margin:0 auto; }
+.page.active { display:block; }
+.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.page-title { font-size:26px; font-weight:700; letter-spacing:-.5px; }
+.page-subtitle { font-size:12px; color:var(--text4); margin-top:2px; }
+
+.tab-bar { position:fixed; bottom:0; left:0; right:0; display:flex; background:rgba(10,10,10,.94); backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px); border-top:1px solid var(--border); padding-bottom:var(--safe); z-index:100; }
+.tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:1px; padding:6px 0 5px; color:var(--text4); font-size:10px; font-weight:500; cursor:pointer; transition:color .15s; }
+.tab.active { color:var(--accent); }
+.tab svg { width:22px; height:22px; }
+
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:8px; }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.card-label { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.6px; }
+.card-value { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.3px; }
+
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mini-graph { height:36px; margin-top:4px; }
+.mini-graph canvas { width:100%; height:100%; display:block; border-radius:6px; }
+
+.progress { height:4px; background:var(--bg3); border-radius:2px; overflow:hidden; margin-top:6px; }
+.progress-fill { height:100%; border-radius:2px; transition:width .5s ease; }
+
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; border-radius:var(--radius-sm); border:1px solid var(--border2); background:var(--bg3); color:var(--text); font-size:13px; font-weight:500; cursor:pointer; transition:all .12s; font-family:inherit; }
+.btn:active { transform:scale(.97); opacity:.8; }
+.btn:disabled { opacity:.4; pointer-events:none; }
+.btn-accent { background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn-danger { background:var(--redBg); border-color:rgba(239,68,68,.15); color:var(--red); }
+.btn-sm { padding:5px 10px; font-size:11px; border-radius:6px; }
+.btn-icon { width:40px; height:40px; padding:0; border-radius:10px; }
+.btn-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+
+.list-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:4px; }
+.list-item-info { flex:1; min-width:0; }
+.list-item-name { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.list-item-detail { font-size:11px; color:var(--text4); margin-top:1px; }
+
+.slider-row { display:flex; align-items:center; gap:10px; padding:6px 0; }
+.slider-label { font-size:12px; color:var(--text2); width:28px; text-align:right; font-variant-numeric:tabular-nums; }
+input[type=range] { -webkit-appearance:none; flex:1; height:4px; border-radius:2px; background:var(--bg3); outline:none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--text); cursor:pointer; }
+
+.search-input { width:100%; padding:9px 12px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:14px; outline:none; font-family:inherit; }
+.search-input::placeholder { color:var(--text4); }
+.search-input:focus { border-color:rgba(99,102,241,.4); }
+
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); z-index:200; display:none; align-items:flex-end; justify-content:center; }
+.overlay.visible { display:flex; }
+.sheet { width:100%; max-width:520px; background:var(--bg1); border-top-left-radius:16px; border-top-right-radius:16px; padding:16px; padding-bottom:calc(16px + var(--safe)); max-height:85vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.sheet-handle { width:32px; height:4px; background:var(--text4); border-radius:2px; margin:0 auto 14px; }
+
+.toast { position:fixed; top:calc(var(--safeT) + 10px); left:50%; transform:translateX(-50%); background:var(--bg3); border:1px solid var(--border2); color:var(--text); padding:8px 16px; border-radius:10px; font-size:12px; z-index:300; opacity:0; transition:opacity .2s; pointer-events:none; font-weight:500; }
+.toast.visible { opacity:1; }
+
+.auth-screen { position:fixed; inset:0; background:var(--bg); z-index:500; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; }
+.auth-logo { font-size:36px; font-weight:800; letter-spacing:-1px; margin-bottom:4px; }
+.auth-subtitle { font-size:13px; color:var(--text4); margin-bottom:32px; }
+.pin-input { display:flex; gap:10px; margin-bottom:20px; }
+.pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--text4); transition:all .15s; }
+.pin-dot.filled { background:var(--accent); border-color:var(--accent); }
+.pin-dot.error { border-color:var(--red); background:var(--red); }
+.numpad { display:grid; grid-template-columns:repeat(3,68px); gap:10px; }
+.numpad-btn { width:68px; height:68px; border-radius:50%; background:var(--bg2); border:1px solid var(--border); color:var(--text); font-size:22px; font-weight:300; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .12s; font-family:inherit; }
+.numpad-btn:active { background:var(--bg3); transform:scale(.95); }
+.numpad-btn.empty { visibility:hidden; }
+.auth-error { color:var(--red); font-size:12px; min-height:18px; margin-bottom:12px; text-align:center; }
+
+.section-title { font-size:13px; font-weight:600; color:var(--text2); margin:16px 0 8px; }
+
+.badge { display:inline-flex; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:600; letter-spacing:.2px; }
+.badge-green { background:var(--greenBg); color:var(--green); }
+.badge-red { background:var(--redBg); color:var(--red); }
+.badge-yellow { background:var(--yellowBg); color:var(--yellow); }
+.badge-accent { background:var(--accentBg); color:var(--accent2); }
+.badge-muted { background:rgba(255,255,255,.06); color:var(--text3); }
+
+.confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
+.confirm-overlay.visible { display:flex; }
+.confirm-box { background:var(--bg2); border:1px solid var(--border2); border-radius:14px; padding:20px; max-width:300px; width:100%; text-align:center; }
+.confirm-title { font-size:16px; font-weight:600; margin-bottom:6px; }
+.confirm-msg { font-size:13px; color:var(--text2); margin-bottom:16px; line-height:1.4; }
+.confirm-buttons { display:flex; gap:8px; }
+.confirm-buttons .btn { flex:1; }
+
+.skeleton { background:linear-gradient(90deg, var(--bg3) 25%, rgba(255,255,255,.04) 50%, var(--bg3) 75%); background-size:200% 100%; animation:shimmer 1.8s infinite; border-radius:6px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+.terminal-output { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; font-family:'SF Mono',Menlo,'Cascadia Code',monospace; font-size:11px; max-height:280px; overflow-y:auto; white-space:pre-wrap; word-break:break-all; color:var(--green); line-height:1.5; }
+.terminal-input-row { display:flex; gap:6px; margin-top:6px; }
+.terminal-input { flex:1; padding:7px 10px; background:var(--bg2); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'SF Mono',Menlo,monospace; font-size:12px; outline:none; }
+
+.screenshot-img { width:100%; border-radius:var(--radius-sm); border:1px solid var(--border); }
+
+.conn-status { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text4); font-weight:500; }
+.conn-dot { width:7px; height:7px; border-radius:50%; background:var(--red); transition:background .3s; }
+.conn-dot.connected { background:var(--green); }
+.conn-dot.reconnecting { background:var(--yellow); animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.quick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.quick-btn { display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 6px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); color:var(--text3); font-size:10px; font-weight:500; cursor:pointer; transition:all .12s; }
+.quick-btn:active { transform:scale(.96); background:var(--bg3); }
+.quick-btn svg { width:20px; height:20px; }
+
+.offline-banner { display:none; padding:6px 16px; background:var(--redBg); border-bottom:1px solid rgba(239,68,68,.15); text-align:center; font-size:11px; color:var(--red); font-weight:500; }
+
+.empty-state { text-align:center; padding:32px 16px; color:var(--text4); }
+.empty-state-icon { font-size:32px; margin-bottom:8px; opacity:.4; }
+.empty-state-title { font-size:14px; font-weight:500; color:var(--text3); margin-bottom:4px; }
+.empty-state-msg { font-size:12px; line-height:1.5; }
+
+.module-card { cursor:pointer; transition:background .12s; }
+.module-card:active { background:var(--bg3); }
+.module-card-row { display:flex; align-items:center; gap:10px; }
+.module-card-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.module-card-icon svg { width:18px; height:18px; }
+.module-card-body { flex:1; min-width:0; }
+.module-card-title { font-size:14px; font-weight:500; }
+.module-card-desc { font-size:11px; color:var(--text4); margin-top:1px; }
+.module-card-chevron { color:var(--text4); font-size:16px; flex-shrink:0; }
+
+.wizard-step { padding:12px; background:var(--bg3); border-radius:var(--radius-sm); margin-bottom:8px; }
+.wizard-step-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.wizard-step-num { width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.wizard-step-num.done { background:var(--green); }
+.wizard-step-num.fail { background:var(--red); }
+.wizard-step-title { font-size:13px; font-weight:500; }
+.wizard-step-body { font-size:12px; color:var(--text2); margin-left:30px; line-height:1.5; }
+
+.quest-overview { display:flex; gap:8px; }
+.quest-stat { text-align:center; flex:1; background:var(--bg3); border-radius:var(--radius-sm); padding:10px 4px; }
+.quest-stat-num { font-size:18px; font-weight:700; color:var(--text); line-height:1.1; }
+.quest-stat-label { font-size:9.5px; color:var(--text3); text-transform:uppercase; letter-spacing:.4px; margin-top:3px; }
+.quest-orbs-banner { display:flex; align-items:center; justify-content:center; gap:6px; background:var(--yellowBg); border-radius:var(--radius-sm); padding:8px; margin-top:8px; font-size:13px; font-weight:700; color:var(--yellow); }
+.quest-orb-dot { width:8px; height:8px; border-radius:50%; background:var(--yellow); flex-shrink:0; }
+.quest-orb-tag { display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:600; color:var(--yellow); white-space:nowrap; flex-shrink:0; }
+.quest-orb-tag .quest-orb-dot { width:6px; height:6px; }
+.quest-section-head { display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:8px 2px; user-select:none; }
+.quest-section-head-title { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.6px; }
+.quest-section-head .chev { transition:transform .2s; color:var(--text4); font-size:10px; }
+.quest-section-head.collapsed .chev { transform:rotate(-90deg); }
+.quest-section-body { max-height:360px; overflow-y:auto; }
+.quest-section-body.collapsed { display:none; }
+.quest-card { background:var(--bg3); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:7px; }
+.quest-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; }
+.quest-name { font-size:12.5px; font-weight:500; color:var(--text); line-height:1.3; }
+.quest-kind { font-size:10.5px; color:var(--text3); margin-top:1px; }
+.quest-meta { display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text3); margin-top:6px; }
+.quest-completed-row { display:flex; justify-content:space-between; align-items:center; padding:7px 2px; border-bottom:1px solid var(--border); font-size:12px; }
+.quest-completed-row:last-child { border-bottom:none; }
+.quest-completed-name { display:flex; align-items:center; gap:6px; color:var(--text2); min-width:0; }
+.quest-completed-name span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.quest-check { color:var(--green); flex-shrink:0; font-size:13px; }
+.quest-log { font-family:'SF Mono',Menlo,'Cascadia Code',monospace; font-size:10.5px; line-height:1.7; max-height:180px; overflow-y:auto; }
+.quest-log-line { display:flex; gap:6px; }
+.quest-log-ts { color:var(--text4); flex-shrink:0; }
+.quest-log-sev { flex-shrink:0; width:15px; font-weight:700; }
+.quest-log-sev.info { color:var(--accent2); }
+.quest-log-sev.success { color:var(--green); }
+.quest-log-sev.warning { color:var(--yellow); }
+.quest-log-sev.error { color:var(--red); }
+.quest-age { font-size:10.5px; color:var(--text4); text-align:right; margin-top:6px; }
+.quest-age.stale { color:var(--yellow); }
+
+@media(max-width:374px) {
+  .page-title { font-size:22px; }
+  .numpad { grid-template-columns:repeat(3,60px); gap:8px; }
+  .numpad-btn { width:60px; height:60px; font-size:20px; }
+  .quick-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media(min-width:768px) {
+  .stats-grid { grid-template-columns:repeat(4,1fr); }
+  .quick-grid { grid-template-columns:repeat(6,1fr); }
+  .btn-grid { grid-template-columns:repeat(4,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-logo">VAMPJRO</div>
+  <div class="auth-subtitle" id="authSubtitle">Remote Control Center</div>
+  <div class="auth-error" id="authError"></div>
+  <div class="pin-input" id="pinDots"></div>
+  <div class="numpad" id="numpad"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle"></div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-buttons">
+      <button class="btn" id="confirmNo">Annulla</button>
+      <button class="btn btn-danger" id="confirmYes">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<div class="offline-banner" id="offlineBanner">Connessione al server persa. Riconnessione automatica...</div>
+<div id="app">
+  <div class="page active" id="pageHome">
+    <div class="page-header">
+      <div>
+        <div class="page-title">VAMPJRO</div>
+        <div class="page-subtitle" id="homeTier"></div>
+      </div>
+      <div class="conn-status"><div class="conn-dot" id="connDot"></div><span id="connLabel">Connessione...</span></div>
+    </div>
+
+    <div class="stats-grid" id="homeStats">
+      <div class="card" id="cpuCard">
+        <div class="card-label">CPU</div>
+        <div class="card-value" id="cpuVal">--</div>
+        <div class="progress"><div class="progress-fill" id="cpuBar" style="width:0;background:var(--accent)"></div></div>
+        <div class="mini-graph"><canvas id="cpuGraph"></canvas></div>
+      </div>
+      <div class="card" id="ramCard">
+        <div class="card-label">RAM</div>
+        <div class="card-value" id="ramVal">--</div>
+        <div class="progress"><div class="progress-fill" id="ramBar" style="width:0;background:var(--green)"></div></div>
+        <div class="mini-graph"><canvas id="ramGraph"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" id="diskCard" style="margin-top:2px;">
+      <div class="card-label">Disco</div>
+      <div id="diskInfo" style="margin-top:4px;font-size:12px;color:var(--text3);">In attesa dati...</div>
+    </div>
+
+    <div class="card" id="batteryCard" style="display:none;">
+      <div class="card-header"><div class="card-label">Batteria</div><span class="badge badge-muted" id="batteryBadge"></span></div>
+      <div class="progress"><div class="progress-fill" id="batteryBar" style="width:0;background:var(--green)"></div></div>
+    </div>
+
+    <div class="card" id="musicWidget" style="display:none;">
+      <div class="card-header"><div class="card-label">Apple Music</div><div class="badge badge-green" id="musicBadge">Connesso</div></div>
+      <div id="musicCardContent" style="font-size:13px;color:var(--text2);">Nessun brano</div>
+    </div>
+
+    <div class="section-title">Azioni rapide</div>
+    <div class="quick-grid" id="quickActions"></div>
+
+    <div class="card" style="margin-top:12px;">
+      <div class="card-header"><div class="card-label">Server</div><div id="uptimeVal" style="font-size:11px;color:var(--text4);font-variant-numeric:tabular-nums;"></div></div>
+      <div style="font-size:12px;color:var(--text3);" id="serverInfo"></div>
+    </div>
+  </div>
+
+  <div class="page" id="pageProcesses">
+    <div class="page-header"><div class="page-title">Processi</div><div id="procCount" style="font-size:11px;color:var(--text4);"></div></div>
+    <input class="search-input" id="procSearch" placeholder="Cerca processo..." type="text">
+    <div style="display:flex;gap:6px;margin:8px 0;">
+      <button class="btn btn-sm" id="sortRam" style="background:var(--accentBg);color:var(--accent);">RAM</button>
+      <button class="btn btn-sm" id="sortCpu">CPU</button>
+      <button class="btn btn-sm" id="sortName">Nome</button>
+    </div>
+    <div id="procList"></div>
+  </div>
+
+  <div class="page" id="pageControls">
+    <div class="page-title" style="margin-bottom:16px;">Controlli</div>
+
+    <div class="section-title">Volume</div>
+    <div class="card">
+      <div class="slider-row">
+        <svg width="16" height="16" fill="var(--text3)" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+        <input type="range" min="0" max="100" value="50" id="volumeSlider">
+        <div class="slider-label" id="volumeLabel">--</div>
+      </div>
+      <button class="btn btn-sm" id="muteBtn" style="margin-top:4px;">Muto</button>
+    </div>
+
+    <div class="section-title">Luminosit&agrave;</div>
+    <div class="card">
+      <div class="slider-row">
+        <svg width="16" height="16" fill="var(--text3)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
+        <input type="range" min="0" max="100" value="100" id="brightnessSlider">
+        <div class="slider-label" id="brightnessLabel">--</div>
+      </div>
+    </div>
+
+    <div class="section-title">Alimentazione</div>
+    <div class="btn-grid">
+      <button class="btn" id="btnLock"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg> Blocca</button>
+      <button class="btn" id="btnSleep"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M9.5 2c-1.82 0-3.53.5-5 1.35 2.99 1.73 5 4.95 5 8.65s-2.01 6.92-5 8.65c1.47.85 3.18 1.35 5 1.35 5.52 0 10-4.48 10-10S15.02 2 9.5 2z"/></svg> Sospendi</button>
+      <button class="btn btn-danger" id="btnRestart"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0012 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg> Riavvia</button>
+      <button class="btn btn-danger" id="btnShutdown"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A5.98 5.98 0 0119 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg> Spegni</button>
+    </div>
+
+    <div class="section-title">Screenshot</div>
+    <div class="card">
+      <button class="btn" id="btnScreenshot" style="width:100%;">Cattura schermo</button>
+      <div id="screenshotContainer" style="margin-top:8px;display:none;"></div>
+    </div>
+
+    <div class="section-title">Keep Awake</div>
+    <div class="card">
+      <div id="keepAwakeStatus" style="font-size:12px;color:var(--text3);margin-bottom:8px;">Non attivo</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <button class="btn btn-sm keep-awake-btn" data-min="30">30 min</button>
+        <button class="btn btn-sm keep-awake-btn" data-min="60">1h</button>
+        <button class="btn btn-sm keep-awake-btn" data-min="120">2h</button>
+        <button class="btn btn-sm keep-awake-btn" data-min="0">Indefinito</button>
+        <button class="btn btn-sm btn-danger" id="btnClearAwake">Stop</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="pageApps">
+    <div class="page-title" style="margin-bottom:16px;">App</div>
+    <div class="card module-card" id="goMusic">
+      <div class="module-card-row">
+        <div class="module-card-icon" style="background:rgba(250,45,72,.12);color:#fa2d48;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg></div>
+        <div class="module-card-body">
+          <div class="module-card-title">Apple Music</div>
+          <div class="module-card-desc" id="musicStatusDesc">Telecomando</div>
+        </div>
+        <div class="badge" id="musicStatusBadge">--</div>
+      </div>
+    </div>
+    <div class="card" id="discordCard">
+      <div class="module-card-row">
+        <div class="module-card-icon" style="background:rgba(88,101,242,.12);color:#5865f2;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.74 19.74 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.11 13.11 0 01-1.872-.892.077.077 0 01-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg></div>
+        <div class="module-card-body">
+          <div class="module-card-title">Discord Canary</div>
+          <div class="module-card-desc" id="discordInfo">Verifica in corso...</div>
+        </div>
+        <div class="badge" id="discordBadge">--</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="pageMore">
+    <div class="page-title" style="margin-bottom:16px;">Altro</div>
+    <div class="card module-card" id="goClipboard"><div class="module-card-row"><div class="module-card-icon" style="background:var(--accentBg);color:var(--accent);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></div><div class="module-card-body"><div class="module-card-title">Clipboard</div><div class="module-card-desc">PC &#8596; iPhone</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+    <div class="card module-card" id="goWindows"><div class="module-card-row"><div class="module-card-icon" style="background:var(--orangeBg);color:var(--orange);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/></svg></div><div class="module-card-body"><div class="module-card-title">Finestre</div><div class="module-card-desc">Gestisci finestre aperte</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+    <div class="card module-card" id="goNetwork"><div class="module-card-row"><div class="module-card-icon" style="background:var(--greenBg);color:var(--green);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div><div class="module-card-body"><div class="module-card-title">Rete</div><div class="module-card-desc">Interfacce e connettivit&agrave;</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+    <div class="card module-card" id="goStorage"><div class="module-card-row"><div class="module-card-icon" style="background:var(--yellowBg);color:var(--yellow);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg></div><div class="module-card-body"><div class="module-card-title">Archiviazione</div><div class="module-card-desc">Spazio disco e partizioni</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+    <div class="card module-card" id="goCrash"><div class="module-card-row"><div class="module-card-icon" style="background:var(--redBg);color:var(--red);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM12 17.3c-.72 0-1.3-.58-1.3-1.3s.58-1.3 1.3-1.3 1.3.58 1.3 1.3-.58 1.3-1.3 1.3zm1-4.3h-2V7h2v6z"/></svg></div><div class="module-card-body"><div class="module-card-title">Crash &amp; Salute</div><div class="module-card-desc">Event Viewer, errori sistema</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+    <div class="card module-card" id="goAudio"><div class="module-card-row"><div class="module-card-icon" style="background:rgba(168,85,247,.12);color:#a855f7;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8.5v7a4.47 4.47 0 002.5-3.5zM14 3.23v2.06a7 7 0 010 13.42v2.06A9 9 0 0014 3.23z"/></svg></div><div class="module-card-body"><div class="module-card-title">Audio Mixer</div><div class="module-card-desc">Volume per applicazione</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+    <div class="card module-card" id="goTerminal"><div class="module-card-row"><div class="module-card-icon" style="background:rgba(34,197,94,.12);color:var(--green);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 19.59V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c.45 0 .85-.15 1.19-.4l-4.43-4.43L20 19.59zM6 20V4h7v5h5v4.59l-5.59 5.59H6z"/></svg></div><div class="module-card-body"><div class="module-card-title">PowerShell</div><div class="module-card-desc">Terminale amministrativo</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+    <div class="card module-card" id="goSettings"><div class="module-card-row"><div class="module-card-icon" style="background:rgba(255,255,255,.06);color:var(--text3);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.6 3.6 0 0112 15.6z"/></svg></div><div class="module-card-body"><div class="module-card-title">Impostazioni</div><div class="module-card-desc">Aggiornamenti, sicurezza</div></div><div class="module-card-chevron">&#8250;</div></div></div>
+
+    <div style="text-align:center;margin-top:24px;padding-bottom:8px;">
+      <div style="font-size:11px;color:var(--text4);">VAMPJRO Remote Control Center</div>
+      <a href="https://t.me/vampjro" style="font-size:11px;color:var(--accent);text-decoration:none;" target="_blank">t.me/vampjro</a>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="subOverlay">
+  <div class="sheet" id="subSheet">
+    <div class="sheet-handle"></div>
+    <div id="subContent"></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" data-page="pageHome">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home
+  </div>
+  <div class="tab" data-page="pageProcesses">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>Processi
+  </div>
+  <div class="tab" data-page="pageControls">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Controlli
+  </div>
+  <div class="tab" data-page="pageApps">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>App
+  </div>
+  <div class="tab" data-page="pageMore">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>Altro
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const V = {
+  ws: null, reconnDelay: 1000, maxReconnDelay: 30000, authenticated: false, token: null,
+  currentPage: 'pageHome', seq: 0, requestId: 0,
+  modules: {}, tier: 'LOW', safeMode: false, version: '1.0.0',
+  cpuHistory: [], ramHistory: [],
+  procSort: 'ram', procSearch: '', procs: [],
+  setupMode: false, pinDigits: [], pinLength: 4,
+  lastActivity: Date.now(), idleThreshold: 120000,
+  connState: 'disconnected', staleTimeout: null, serverPid: null
+};
+
+function toast(msg, duration) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), duration || 2200);
+}
+
+function haptic() { try { navigator.vibrate(8); } catch(e){} }
+
+let confirmResolve = null;
+function confirm(title, msg) {
+  return new Promise(resolve => {
+    confirmResolve = resolve;
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmOverlay').classList.add('visible');
+  });
+}
+document.getElementById('confirmYes').onclick = () => { document.getElementById('confirmOverlay').classList.remove('visible'); if(confirmResolve) confirmResolve(true); };
+document.getElementById('confirmNo').onclick = () => { document.getElementById('confirmOverlay').classList.remove('visible'); if(confirmResolve) confirmResolve(false); };
+
+function setConnState(state) {
+  V.connState = state;
+  const dot = document.getElementById('connDot');
+  const label = document.getElementById('connLabel');
+  dot.className = 'conn-dot';
+  if (state === 'connected') { dot.classList.add('connected'); label.textContent = 'Connesso'; }
+  else if (state === 'reconnecting') { dot.classList.add('reconnecting'); label.textContent = 'Riconnessione in ' + Math.ceil(V.reconnDelay / 1000) + 's...'; }
+  else if (state === 'stale') { label.textContent = 'Dati non aggiornati'; }
+  else { label.textContent = 'Disconnesso'; }
+  const banner = document.getElementById('offlineBanner');
+  if (banner) banner.style.display = (state === 'connected' || state === 'stale') ? 'none' : 'block';
+}
+
+function wsConnect() {
+  if (V.ws && (V.ws.readyState === 0 || V.ws.readyState === 1)) return;
+  V.ws = new WebSocket('ws://' + location.host);
+
+  V.ws.onopen = () => {
+    V.reconnDelay = 1000;
+    setConnState('connected');
+    const saved = localStorage.getItem('vampjro_token');
+    if (saved) wsSend({ type: 'tokenAuth', token: saved });
+  };
+
+  V.ws.onmessage = (e) => {
+    V.lastActivity = Date.now();
+    clearTimeout(V.staleTimeout);
+    V.staleTimeout = setTimeout(() => { if (V.connState === 'connected') setConnState('stale'); }, 60000);
+    let msg;
+    try { msg = JSON.parse(e.data); } catch { return; }
+    handleMessage(msg);
+  };
+
+  V.ws.onclose = () => {
+    setConnState('disconnected');
+    V.authenticated = false;
+    clearTimeout(V.staleTimeout);
+    const delay = V.reconnDelay;
+    V.reconnDelay = Math.min(V.reconnDelay * 1.5, V.maxReconnDelay);
+    setTimeout(() => { setConnState('reconnecting'); wsConnect(); }, delay);
+  };
+
+  V.ws.onerror = () => {};
+}
+
+function wsSend(msg) {
+  if (V.ws && V.ws.readyState === 1) {
+    msg.requestId = ++V.requestId;
+    V.ws.send(JSON.stringify(msg));
+    return msg.requestId;
+  }
+  return null;
+}
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case 'needSetup': V.setupMode = true; V.pinLength = 4; showAuth('Crea un PIN di accesso'); break;
+    case 'needAuth': V.setupMode = false; showAuth('Inserisci PIN'); break;
+    case 'setupComplete': toast('PIN configurato'); V.setupMode = false; showAuth('Inserisci PIN'); break;
+    case 'authSuccess':
+      V.authenticated = true; V.token = msg.token;
+      V.modules = msg.modules || {}; V.tier = msg.hardwareTier || 'LOW';
+      V.safeMode = msg.safeMode || false; V.version = msg.version || '1.0.0';
+      localStorage.setItem('vampjro_token', msg.token);
+      hideAuth(); onAuthenticated(); break;
+    case 'authFailed': showAuthError(msg.error || 'PIN errato'); break;
+    case 'ping': wsSend({ type: 'pong' }); break;
+    case 'systemStats': updateSystemStats(msg.data); break;
+    case 'processList': V.procs = msg.data; renderProcesses(); break;
+    case 'getSystemStatsResult': updateSystemStats(msg.data); break;
+    case 'getStaticInfoResult': updateStaticInfo(msg.data); break;
+    case 'getSystemHistoryResult':
+      if (msg.data) { V.cpuHistory = msg.data.cpu || []; V.ramHistory = msg.data.ram || []; drawGraphs(); } break;
+    case 'getProcessesResult': V.procs = msg.data; renderProcesses(); break;
+    case 'killProcessResult': toast('Processo terminato'); wsSend({ type: 'getProcesses' }); break;
+    case 'getVolumeResult': updateVolume(msg.data); break;
+    case 'setVolumeResult': if (msg.data) updateVolume(msg.data); break;
+    case 'getBrightnessResult': updateBrightness(msg.data); break;
+    case 'setBrightnessResult': if (msg.data) updateBrightness(msg.data); break;
+    case 'screenshotResult': showScreenshot(msg.data); break;
+    case 'getKeepAwakeStatusResult': case 'keepAwakeResult': case 'clearKeepAwakeResult':
+      updateKeepAwake(msg.data);
+      if (msg.type === 'keepAwakeResult') toast('Keep Awake attivato');
+      if (msg.type === 'clearKeepAwakeResult') toast('Keep Awake disattivato');
+      break;
+    case 'getCrashLogsResult': case 'refreshCrashLogsResult': renderCrashLogs(msg.data); break;
+    case 'getClipboardResult': renderClipboard(msg.data); break;
+    case 'setClipboardResult': toast('Clipboard aggiornata'); break;
+    case 'getWindowsResult': renderWindows(msg.data); break;
+    case 'focusWindowResult': case 'minimizeWindowResult': case 'maximizeWindowResult': case 'closeWindowResult':
+      toast('Fatto'); wsSend({ type: 'getWindows' }); break;
+    case 'getNetworkResult': renderNetwork(msg.data); break;
+    case 'getStorageResult': renderStorage(msg.data); break;
+    case 'getAudioResult': renderAudio(msg.data); break;
+    case 'setAudioVolumeResult': wsSend({ type: 'getAudio' }); break;
+    case 'terminalResult': handleTerminalResult(msg.data); break;
+    case 'getDiscordStatusResult': renderDiscord(msg.data); break;
+    case 'getMusicStatusResult': updateMusicStatus(msg.data); break;
+    case 'checkUpdatesResult': case 'getUpdateStatusResult': renderUpdateStatus(msg.data); break;
+    case 'downloadUpdateResult': case 'getDownloadStatusResult': renderDownloadStatus(msg.data); break;
+    case 'installUpdateResult': if (!msg.data.ok) toast(msg.data.error || 'Installazione fallita'); break;
+    case 'getBackendStatusResult': updateManagedIndicator(msg.data); break;
+    case 'error': toast(msg.error || 'Errore'); break;
+    case 'permissionDenied': toast('Bloccato: ' + (msg.reason || 'Safe Mode')); break;
+  }
+}
+
+function showAuth(subtitle) {
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('authSubtitle').textContent = subtitle;
+  document.getElementById('authError').textContent = '';
+  V.pinDigits = [];
+  renderPinDots(); renderNumpad();
+}
+function hideAuth() { document.getElementById('authScreen').style.display = 'none'; }
+function showAuthError(msg) {
+  document.getElementById('authError').textContent = msg;
+  V.pinDigits = [];
+  const dots = document.querySelectorAll('.pin-dot');
+  dots.forEach(d => { d.classList.add('error'); d.classList.remove('filled'); });
+  setTimeout(() => { dots.forEach(d => d.classList.remove('error')); renderPinDots(); }, 500);
+}
+
+function renderPinDots() {
+  const c = document.getElementById('pinDots'); c.innerHTML = '';
+  for (let i = 0; i < V.pinLength; i++) {
+    const d = document.createElement('div');
+    d.className = 'pin-dot' + (i < V.pinDigits.length ? ' filled' : '');
+    c.appendChild(d);
+  }
+}
+
+function renderNumpad() {
+  const g = document.getElementById('numpad'); g.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(k => {
+    const b = document.createElement('div');
+    b.className = 'numpad-btn' + (k === '' ? ' empty' : '');
+    b.textContent = k;
+    if (k !== '') b.onclick = () => {
+      haptic();
+      if (k === '⌫') V.pinDigits.pop();
+      else if (V.pinDigits.length < V.pinLength) V.pinDigits.push(k);
+      renderPinDots();
+      if (V.pinDigits.length === V.pinLength) {
+        const pin = V.pinDigits.join('');
+        wsSend(V.setupMode ? { type: 'setupPin', pin } : { type: 'auth', pin });
+        V.pinDigits = [];
+      }
+    };
+    g.appendChild(b);
+  });
+}
+
+function onAuthenticated() {
+  document.getElementById('homeTier').textContent = V.tier + ' · v' + V.version;
+  wsSend({ type: 'subscribe', channels: ['system'] });
+  wsSend({ type: 'getSystemStats' });
+  wsSend({ type: 'getStaticInfo' });
+  wsSend({ type: 'getSystemHistory', count: 60 });
+  wsSend({ type: 'getMusicStatus' });
+  wsSend({ type: 'getKeepAwakeStatus' });
+  wsSend({ type: 'getBackendStatus' });
+  renderQuickActions();
+}
+
+function updateManagedIndicator(data) {
+  let el = document.getElementById('managedBadge');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'managedBadge';
+    el.style.cssText = 'display:none;padding:6px 10px;background:var(--accentBg);border:1px solid rgba(99,102,241,.2);border-radius:var(--radius-sm);margin-bottom:12px;font-size:11px;color:var(--accent2);font-weight:500;text-align:center;';
+    const page = document.getElementById('pageHome');
+    const stats = document.getElementById('homeStats');
+    page.insertBefore(el, stats);
+  }
+  if (data && data.enabled && data.connected) {
+    el.textContent = 'Managed by VAMPJRO Owner';
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => { haptic(); navigateTo(tab.dataset.page); };
+});
+
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
+  V.currentPage = page;
+  onPageEnter(page);
+}
+
+function onPageEnter(page) {
+  if (!V.authenticated) return;
+  if (page === 'pageProcesses') { wsSend({ type: 'subscribe', channels: ['processes'] }); wsSend({ type: 'getProcesses' }); }
+  else { wsSend({ type: 'unsubscribe', channels: ['processes'] }); }
+  if (page === 'pageControls') { wsSend({ type: 'getVolume' }); wsSend({ type: 'getBrightness' }); wsSend({ type: 'getKeepAwakeStatus' }); }
+  if (page === 'pageApps') { wsSend({ type: 'getMusicStatus' }); wsSend({ type: 'getDiscordStatus' }); }
+  if (page === 'pageHome') { wsSend({ type: 'subscribe', channels: ['system'] }); }
+}
+
+function updateSystemStats(data) {
+  if (!data) return;
+  const cpuLoad = data.cpu?.load ?? 0;
+  document.getElementById('cpuVal').textContent = cpuLoad + '%';
+  document.getElementById('cpuBar').style.width = cpuLoad + '%';
+  document.getElementById('cpuBar').style.background = cpuLoad > 80 ? 'var(--red)' : cpuLoad > 50 ? 'var(--yellow)' : 'var(--accent)';
+  const ramPct = data.mem?.percent ?? 0;
+  document.getElementById('ramVal').textContent = ramPct + '%';
+  document.getElementById('ramBar').style.width = ramPct + '%';
+  document.getElementById('ramBar').style.background = ramPct > 85 ? 'var(--red)' : 'var(--green)';
+
+  if (data.fs && data.fs.length) {
+    document.getElementById('diskInfo').innerHTML = data.fs.map(f =>
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span style="color:var(--text2)">' + f.mount + '</span><span style="color:var(--text4)">' + formatBytes(f.available) + ' liberi</span></div>' +
+      '<div class="progress" style="margin-top:0;margin-bottom:6px;"><div class="progress-fill" style="width:' + f.percent + '%;background:' + (f.percent > 90 ? 'var(--red)' : f.percent > 70 ? 'var(--yellow)' : 'var(--accent)') + '"></div></div>'
+    ).join('');
+  }
+
+  const bc = document.getElementById('batteryCard');
+  if (data.battery && data.battery.percent !== undefined) {
+    bc.style.display = 'block';
+    document.getElementById('batteryBadge').textContent = data.battery.percent + '%' + (data.battery.charging ? ' ⚡' : '');
+    document.getElementById('batteryBar').style.width = data.battery.percent + '%';
+    document.getElementById('batteryBar').style.background = data.battery.percent < 20 ? 'var(--red)' : 'var(--green)';
+  } else { bc.style.display = 'none'; }
+
+  V.cpuHistory.push({ ts: data.ts || Date.now(), v: cpuLoad });
+  V.ramHistory.push({ ts: data.ts || Date.now(), v: ramPct });
+  if (V.cpuHistory.length > 60) V.cpuHistory.shift();
+  if (V.ramHistory.length > 60) V.ramHistory.shift();
+  drawGraphs();
+
+  if (data.uptime) document.getElementById('uptimeVal').textContent = formatUptime(data.uptime);
+}
+
+function updateStaticInfo(data) {
+  if (!data) return;
+  let info = V.tier;
+  if (data.cpu?.brand) info += ' · ' + data.cpu.brand;
+  document.getElementById('homeTier').textContent = info;
+  let serverHtml = '';
+  if (data.os) serverHtml += data.os.distro + ' ' + (data.os.release || '') + '<br>';
+  if (data.gpu?.length) serverHtml += 'GPU: ' + data.gpu.map(g => g.model).join(', ') + '<br>';
+  serverHtml += 'RAM: ' + formatBytes(data.totalMem);
+  document.getElementById('serverInfo').innerHTML = serverHtml;
+  V.serverPid = null;
+}
+
+function drawGraphs() {
+  drawMiniGraph('cpuGraph', V.cpuHistory, '#6366f1');
+  drawMiniGraph('ramGraph', V.ramHistory, '#22c55e');
+}
+
+function drawMiniGraph(id, data, color) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * 2; canvas.height = rect.height * 2;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (data.length < 2) return;
+  const w = canvas.width, h = canvas.height, step = w / (data.length - 1);
+  ctx.beginPath(); ctx.moveTo(0, h);
+  data.forEach((d, i) => { const x = i * step, y = h - (d.v / 100) * h; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+  ctx.fillStyle = color + '18'; ctx.fill();
+  ctx.beginPath();
+  data.forEach((d, i) => { const x = i * step, y = h - (d.v / 100) * h; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+}
+
+function renderQuickActions() {
+  const grid = document.getElementById('quickActions');
+  const actions = [
+    { icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>', label: 'Screenshot', action: () => { wsSend({ type: 'screenshot' }); toast('Cattura...'); } },
+    { icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg>', label: 'Blocca', action: () => dangerAction('lock', 'Blocca PC', 'Il PC verrà bloccato.') },
+    { icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 2c-1.82 0-3.53.5-5 1.35 2.99 1.73 5 4.95 5 8.65s-2.01 6.92-5 8.65c1.47.85 3.18 1.35 5 1.35 5.52 0 10-4.48 10-10S15.02 2 9.5 2z"/></svg>', label: 'Sospendi', action: () => dangerAction('sleep', 'Sospendi', 'Il PC verrà sospeso.') },
+    { icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A5.98 5.98 0 0119 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>', label: 'Spegni', action: () => dangerAction('shutdown', 'Spegni PC', 'Tutte le sessioni verranno chiuse.') },
+    { icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z"/></svg>', label: 'Clipboard', action: () => openSub('clipboard') },
+    { icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/></svg>', label: 'Keep Awake', action: () => wsSend({ type: 'keepAwake', duration: 60 }) },
+  ];
+  grid.innerHTML = actions.map((a, i) => '<div class="quick-btn" data-qi="' + i + '">' + a.icon + '<span>' + a.label + '</span></div>').join('');
+  grid.querySelectorAll('.quick-btn').forEach((btn, i) => { btn.onclick = () => { haptic(); actions[i].action(); }; });
+}
+
+async function dangerAction(type, title, msg) {
+  const ok = await confirm(title, msg);
+  if (ok) wsSend({ type });
+}
+
+function renderProcesses() {
+  let list = [...V.procs];
+  const search = V.procSearch.toLowerCase();
+  if (search) list = list.filter(p => p.name.toLowerCase().includes(search));
+  if (V.procSort === 'ram') list.sort((a, b) => b.ram - a.ram);
+  else if (V.procSort === 'cpu') list.sort((a, b) => b.cpu - a.cpu);
+  else list.sort((a, b) => a.name.localeCompare(b.name));
+
+  document.getElementById('procCount').textContent = list.length + ' processi';
+  const container = document.getElementById('procList');
+  if (!list.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-title">Nessun processo</div></div>'; return; }
+
+  container.innerHTML = list.slice(0, 80).map(p => {
+    const isVampjro = p.name === 'node.exe' && p.pid === (V.serverPid || 0);
+    return '<div class="list-item"><div class="list-item-info"><div class="list-item-name">' + esc(p.name) + '</div>' +
+      '<div class="list-item-detail">PID ' + p.pid + ' · ' + p.ram + ' MB</div></div>' +
+      '<button class="btn btn-sm btn-danger" data-kill="' + p.pid + '" data-name="' + esc(p.name) + '">Kill</button></div>';
+  }).join('');
+
+  container.querySelectorAll('[data-kill]').forEach(btn => {
+    btn.onclick = async () => {
+      haptic();
+      const pid = parseInt(btn.dataset.kill, 10);
+      const name = btn.dataset.name;
+      const ok = await confirm('Termina processo', 'Terminare ' + name + ' (PID ' + pid + ')?');
+      if (ok) wsSend({ type: 'killProcess', pid });
+    };
+  });
+}
+
+document.getElementById('procSearch').oninput = (e) => { V.procSearch = e.target.value; renderProcesses(); };
+['sortRam','sortCpu','sortName'].forEach(id => {
+  document.getElementById(id).onclick = () => {
+    V.procSort = id.replace('sort','').toLowerCase();
+    document.querySelectorAll('#sortRam,#sortCpu,#sortName').forEach(b => { b.style.background = ''; b.style.color = ''; });
+    document.getElementById(id).style.background = 'var(--accentBg)';
+    document.getElementById(id).style.color = 'var(--accent)';
+    renderProcesses();
+  };
+});
+
+let volTimeout = null;
+document.getElementById('volumeSlider').oninput = (e) => {
+  document.getElementById('volumeLabel').textContent = e.target.value;
+  clearTimeout(volTimeout);
+  volTimeout = setTimeout(() => wsSend({ type: 'setVolume', level: parseInt(e.target.value) }), 200);
+};
+document.getElementById('muteBtn').onclick = () => { haptic(); wsSend({ type: 'setMute', muted: true }); };
+
+let brightTimeout = null;
+document.getElementById('brightnessSlider').oninput = (e) => {
+  document.getElementById('brightnessLabel').textContent = e.target.value;
+  clearTimeout(brightTimeout);
+  brightTimeout = setTimeout(() => wsSend({ type: 'setBrightness', level: parseInt(e.target.value) }), 200);
+};
+
+function updateVolume(data) {
+  if (!data) return;
+  if (data.volume >= 0) { document.getElementById('volumeSlider').value = data.volume; document.getElementById('volumeLabel').textContent = data.volume; }
+  const btn = document.getElementById('muteBtn');
+  btn.textContent = data.muted ? 'Riattiva' : 'Muto';
+  btn.onclick = () => { haptic(); wsSend({ type: 'setMute', muted: !data.muted }); };
+  if (data.error) toast(data.error);
+}
+
+function updateBrightness(data) {
+  if (!data) return;
+  if (data.brightness >= 0) { document.getElementById('brightnessSlider').value = data.brightness; document.getElementById('brightnessLabel').textContent = data.brightness; }
+  if (data.error && data.brightness < 0) document.getElementById('brightnessLabel').textContent = 'N/A';
+}
+
+document.getElementById('btnLock').onclick = () => { haptic(); dangerAction('lock', 'Blocca PC', 'Il PC verrà bloccato.'); };
+document.getElementById('btnSleep').onclick = () => { haptic(); dangerAction('sleep', 'Sospendi', 'Il PC verrà sospeso.'); };
+document.getElementById('btnRestart').onclick = () => { haptic(); dangerAction('restart', 'Riavvia PC', 'Tutti i programmi verranno chiusi.'); };
+document.getElementById('btnShutdown').onclick = () => { haptic(); dangerAction('shutdown', 'Spegni PC', 'Tutti i programmi verranno chiusi.'); };
+
+document.getElementById('btnScreenshot').onclick = () => { haptic(); wsSend({ type: 'screenshot' }); toast('Cattura in corso...'); };
+function showScreenshot(data) {
+  if (!data || !data.url) return;
+  const c = document.getElementById('screenshotContainer');
+  c.style.display = 'block';
+  c.innerHTML = '<img class="screenshot-img" src="' + data.url + '?t=' + Date.now() + '" alt="Screenshot">';
+}
+
+document.querySelectorAll('.keep-awake-btn').forEach(btn => {
+  btn.onclick = () => { haptic(); wsSend({ type: 'keepAwake', duration: parseInt(btn.dataset.min) }); };
+});
+document.getElementById('btnClearAwake').onclick = () => { haptic(); wsSend({ type: 'clearKeepAwake' }); };
+
+function updateKeepAwake(data) {
+  const el = document.getElementById('keepAwakeStatus');
+  if (!data) return;
+  if (data.active) {
+    el.textContent = data.remaining ? 'Attivo · ' + Math.round(data.remaining / 60000) + ' min' : 'Attivo · Indefinito';
+    el.style.color = 'var(--green)';
+  } else { el.textContent = 'Non attivo'; el.style.color = 'var(--text3)'; }
+}
+
+function openSub(page) {
+  const overlay = document.getElementById('subOverlay');
+  const content = document.getElementById('subContent');
+  overlay.classList.add('visible');
+  switch (page) {
+    case 'clipboard': renderClipboardSub(content); break;
+    case 'windows': content.innerHTML = '<div class="card-label" style="margin-bottom:10px;">Finestre aperte</div><div id="subWindowsList"><div class="empty-state"><div class="skeleton" style="height:40px;margin-bottom:6px;"></div><div class="skeleton" style="height:40px;margin-bottom:6px;"></div><div class="skeleton" style="height:40px;"></div></div></div>'; wsSend({ type: 'getWindows' }); break;
+    case 'network': content.innerHTML = '<div class="card-label" style="margin-bottom:10px;">Rete</div><div id="subNetworkInfo"><div class="skeleton" style="height:60px;"></div></div>'; wsSend({ type: 'getNetwork' }); break;
+    case 'storage': content.innerHTML = '<div class="card-label" style="margin-bottom:10px;">Archiviazione</div><div id="subStorageInfo"><div class="skeleton" style="height:60px;"></div></div>'; wsSend({ type: 'getStorage' }); break;
+    case 'crash': content.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="card-label">Crash &amp; Errori</div><button class="btn btn-sm" id="subRefreshCrash">Aggiorna</button></div><div id="subCrashList"><div class="skeleton" style="height:60px;"></div></div>'; wsSend({ type: 'getCrashLogs' }); document.getElementById('subRefreshCrash').onclick = () => { document.getElementById('subCrashList').innerHTML = '<div class="skeleton" style="height:60px;"></div>'; wsSend({ type: 'refreshCrashLogs' }); }; break;
+    case 'audio': content.innerHTML = '<div class="card-label" style="margin-bottom:10px;">Audio Mixer</div><div id="subAudioList"><div class="skeleton" style="height:40px;margin-bottom:6px;"></div><div class="skeleton" style="height:40px;"></div></div>'; wsSend({ type: 'getAudio' }); break;
+    case 'terminal': renderTerminalSub(content); break;
+    case 'settings': renderSettingsSub(content); break;
+    case 'discord-wizard': renderDiscordWizard(content); break;
+  }
+}
+
+function closeSub() {
+  document.getElementById('subOverlay').classList.remove('visible');
+  if (window._subCleanup) { window._subCleanup(); window._subCleanup = null; }
+}
+document.getElementById('subOverlay').onclick = (e) => { if (e.target === document.getElementById('subOverlay')) closeSub(); };
+
+function renderClipboardSub(el) {
+  el.innerHTML = '<div class="card-label" style="margin-bottom:10px;">Clipboard</div>' +
+    '<div class="card"><div style="font-size:11px;color:var(--text4);margin-bottom:4px;">Testo dal PC</div>' +
+    '<div id="subClipText" style="font-size:13px;min-height:32px;word-break:break-all;color:var(--text2);">Caricamento...</div>' +
+    '<button class="btn btn-sm" style="margin-top:6px;" id="subClipCopy">Copia</button></div>' +
+    '<div class="card"><div style="font-size:11px;color:var(--text4);margin-bottom:4px;">Invia al PC</div>' +
+    '<textarea class="search-input" id="subClipSend" rows="3" placeholder="Scrivi qui..." style="resize:vertical;"></textarea>' +
+    '<button class="btn btn-sm btn-accent" style="margin-top:6px;width:100%;" id="subClipSendBtn">Invia</button></div>';
+  wsSend({ type: 'getClipboard' });
+  document.getElementById('subClipCopy').onclick = async () => {
+    const text = document.getElementById('subClipText').textContent;
+    try { await navigator.clipboard.writeText(text); toast('Copiato'); } catch { toast('Errore copia'); }
+  };
+  document.getElementById('subClipSendBtn').onclick = () => {
+    const text = document.getElementById('subClipSend').value;
+    if (text) wsSend({ type: 'setClipboard', text });
+  };
+}
+
+function renderClipboard(data) {
+  const el = document.getElementById('subClipText');
+  if (el) el.textContent = data?.text || '(vuoto)';
+}
+
+function renderWindows(data) {
+  const el = document.getElementById('subWindowsList');
+  if (!el) return;
+  if (!data || !data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-title">Nessuna finestra aperta</div></div>'; return; }
+  el.innerHTML = data.map(w =>
+    '<div class="list-item"><div class="list-item-info"><div class="list-item-name">' + esc(w.title) + '</div>' +
+    '<div class="list-item-detail">PID ' + w.pid + ' · ' + w.state + '</div></div>' +
+    '<div style="display:flex;gap:4px;">' +
+    '<button class="btn btn-sm" data-waction="focus" data-pid="' + w.pid + '" title="Focus">↑</button>' +
+    '<button class="btn btn-sm" data-waction="minimize" data-pid="' + w.pid + '" title="Minimizza">↓</button>' +
+    '<button class="btn btn-sm btn-danger" data-waction="close" data-pid="' + w.pid + '" title="Chiudi">×</button>' +
+    '</div></div>'
+  ).join('');
+  el.querySelectorAll('[data-waction]').forEach(btn => {
+    btn.onclick = async () => {
+      haptic();
+      const pid = parseInt(btn.dataset.pid);
+      const action = btn.dataset.waction;
+      if (action === 'close') {
+        const ok = await confirm('Chiudi finestra', 'Chiudere questa finestra?');
+        if (!ok) return;
+      }
+      wsSend({ type: action + 'Window', pid });
+    };
+  });
+}
+
+function renderNetwork(data) {
+  const el = document.getElementById('subNetworkInfo');
+  if (!el || !data) return;
+  let html = '';
+  if (data.interfaces?.length) {
+    data.interfaces.forEach(i => {
+      html += '<div class="card"><div class="card-label">' + esc(i.name) + '</div>' +
+        '<div style="font-size:12px;color:var(--text3);margin-top:4px;line-height:1.6;">' +
+        'IP: ' + (i.ip4 || '—') + '<br>Tipo: ' + (i.type || '—') + '<br>MAC: ' + (i.mac || '—') + '</div></div>';
+    });
+  } else { html = '<div class="empty-state"><div class="empty-state-title">Nessuna interfaccia trovata</div></div>'; }
+  if (data.gateway) html += '<div style="font-size:11px;color:var(--text4);margin-top:6px;">Gateway: ' + data.gateway + '</div>';
+  el.innerHTML = html;
+}
+
+function renderStorage(data) {
+  const el = document.getElementById('subStorageInfo');
+  if (!el || !data) return;
+  let html = '';
+  if (data.disks?.length) {
+    data.disks.forEach(d => {
+      html += '<div class="card"><div class="card-label">' + esc(d.name || 'Disco') + '</div>' +
+        '<div style="font-size:12px;color:var(--text3);margin-top:4px;">' + (d.type || '') + ' · ' + formatBytes(d.size) + '</div></div>';
+    });
+  }
+  if (data.partitions?.length) {
+    data.partitions.forEach(p => {
+      html += '<div class="card"><div style="display:flex;justify-content:space-between;"><span class="card-label">' + p.mount + '</span><span style="font-size:11px;color:var(--text4)">' + p.percent + '%</span></div>' +
+        '<div class="progress" style="margin-top:4px;"><div class="progress-fill" style="width:' + p.percent + '%;background:' + (p.percent > 90 ? 'var(--red)' : 'var(--accent)') + '"></div></div>' +
+        '<div style="font-size:11px;color:var(--text4);margin-top:3px;">' + formatBytes(p.available) + ' liberi / ' + formatBytes(p.size) + '</div></div>';
+    });
+  }
+  if (!html) html = '<div class="empty-state"><div class="empty-state-title">Nessun disco trovato</div></div>';
+  el.innerHTML = html;
+}
+
+function renderCrashLogs(data) {
+  const el = document.getElementById('subCrashList');
+  if (!el) return;
+  if (!data || !data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-title">Nessun errore recente</div><div class="empty-state-msg">Nessun evento critico negli ultimi 7 giorni.</div></div>'; return; }
+  el.innerHTML = data.map(l =>
+    '<div class="card" style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;">' +
+    '<span class="badge ' + (l.level === 'Critical' ? 'badge-red' : 'badge-yellow') + '">' + esc(l.level) + '</span>' +
+    '<span style="font-size:10px;color:var(--text4);">' + new Date(l.time).toLocaleString('it-IT') + '</span></div>' +
+    '<div style="font-size:12px;font-weight:500;margin-top:4px;">' + esc(l.source) + '</div>' +
+    '<div style="font-size:11px;color:var(--text3);margin-top:2px;word-break:break-word;line-height:1.4;">' + esc(l.message).substring(0, 200) + '</div></div>'
+  ).join('');
+}
+
+function renderAudio(data) {
+  const el = document.getElementById('subAudioList');
+  if (!el) return;
+  if (data?.error) { el.innerHTML = '<div class="empty-state"><div class="empty-state-title">Audio non disponibile</div><div class="empty-state-msg">' + esc(data.error) + '</div></div>'; return; }
+  if (!data?.sessions?.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-title">Nessuna sessione audio</div><div class="empty-state-msg">Nessuna applicazione sta riproducendo audio.</div></div>'; return; }
+  el.innerHTML = '<button class="btn btn-sm" id="subRefreshAudio" style="margin-bottom:8px;">Aggiorna</button>' +
+    data.sessions.map(s =>
+    '<div class="list-item"><div class="list-item-info"><div class="list-item-name">' + esc(s.processName || s.name) + '</div>' +
+    '<div class="list-item-detail">' + (s.volume >= 0 ? s.volume + '%' : '—') + (s.muted ? ' · Muto' : '') + '</div></div>' +
+    '<input type="range" min="0" max="100" value="' + (s.volume >= 0 ? s.volume : 100) + '" data-audio-pid="' + s.pid + '" style="width:80px;"></div>'
+  ).join('');
+  document.getElementById('subRefreshAudio').onclick = () => { el.innerHTML = '<div class="skeleton" style="height:40px;"></div>'; wsSend({ type: 'getAudio' }); };
+  el.querySelectorAll('[data-audio-pid]').forEach(slider => {
+    let t;
+    slider.oninput = () => { clearTimeout(t); t = setTimeout(() => wsSend({ type: 'setAudioVolume', pid: parseInt(slider.dataset.audioPid), volume: parseInt(slider.value) }), 300); };
+  });
+}
+
+let termOpen = false, termPollTimer = null;
+function renderTerminalSub(el) {
+  el.innerHTML = '<div class="card-label" style="margin-bottom:2px;">PowerShell</div>' +
+    '<div style="font-size:10px;color:var(--red);margin-bottom:10px;font-weight:600;">SESSIONE AMMINISTRATIVA</div>' +
+    '<div class="terminal-output" id="subTermOutput"></div>' +
+    '<div class="terminal-input-row"><input class="terminal-input" id="subTermInput" placeholder="Comando..." autocapitalize="off" autocorrect="off" spellcheck="false">' +
+    '<button class="btn btn-sm btn-accent" id="subTermSend">Esegui</button></div>' +
+    '<div style="display:flex;gap:6px;margin-top:6px;">' +
+    '<button class="btn btn-sm" id="subTermOpen">Apri sessione</button>' +
+    '<button class="btn btn-sm btn-danger" id="subTermClose">Chiudi</button></div>';
+  document.getElementById('subTermOpen').onclick = () => { wsSend({ type: 'terminal', action: 'open' }); termOpen = true; toast('Sessione aperta'); startTermPoll(); };
+  document.getElementById('subTermClose').onclick = () => { wsSend({ type: 'terminal', action: 'close' }); termOpen = false; toast('Sessione chiusa'); };
+  document.getElementById('subTermSend').onclick = sendTermCmd;
+  document.getElementById('subTermInput').onkeydown = (e) => { if (e.key === 'Enter') sendTermCmd(); };
+}
+
+function sendTermCmd() {
+  const i = document.getElementById('subTermInput');
+  if (!i || !i.value.trim()) return;
+  wsSend({ type: 'terminal', action: 'exec', command: i.value });
+  i.value = '';
+}
+
+function startTermPoll() {
+  if (termPollTimer) clearInterval(termPollTimer);
+  termPollTimer = setInterval(() => { if (!termOpen) { clearInterval(termPollTimer); return; } wsSend({ type: 'terminal', action: 'output' }); }, 1500);
+}
+
+function handleTerminalResult(data) {
+  if (!data) return;
+  if (data.sessionId) { toast('Sessione aperta'); return; }
+  if (data.output) {
+    const el = document.getElementById('subTermOutput');
+    if (!el) return;
+    el.textContent = data.output.map(o => (o.type === 'input' ? '> ' : '') + o.text).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+function renderSettingsSub(el) {
+  const connectUrl = 'http://' + location.host;
+  el.innerHTML = '<div class="card-label" style="margin-bottom:12px;">Impostazioni</div>' +
+    '<div class="card"><div class="card-label">Aggiungi un dispositivo</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:4px;">Apri questo indirizzo dal browser del nuovo dispositivo (stessa rete Wi-Fi), poi inserisci il PIN:</div>' +
+    '<div id="connectUrlBox" style="font-family:monospace;font-size:13px;margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:6px;word-break:break-all;user-select:all;">' + esc(connectUrl) + '</div>' +
+    '<button class="btn btn-sm" id="btnCopyConnectUrl" style="margin-top:8px;">Copia indirizzo</button></div>' +
+    '<div class="card" id="troubleshootToggle" style="cursor:pointer;"><div class="card-label">Risoluzione problemi</div>' +
+    '<div style="font-size:11px;color:var(--text4);margin-top:2px;">Il nuovo dispositivo non si collega?</div></div>' +
+    '<div id="troubleshootContent" style="display:none;margin-top:4px;"><div class="card" style="padding:14px;">' +
+    '<div style="font-size:12px;color:var(--text3);line-height:1.7;">' +
+    '&bull; Verifica che entrambi i dispositivi siano sulla <strong style="color:var(--text2);">stessa rete Wi-Fi</strong> (non dati mobili)<br>' +
+    '&bull; Controlla di aver digitato l\'indirizzo esattamente come mostrato sopra<br>' +
+    '&bull; Se il PC ha un firewall attivo, potrebbe bloccare la porta ' + esc(location.port || '80') + ': consenti Node.js/VAMPJRO nelle eccezioni<br>' +
+    '&bull; Se hai dimenticato il PIN, chiudi VAMPJRO ed elimina <code style="background:var(--bg3);padding:1px 4px;border-radius:3px;">config.json</code> dalla cartella dati (vedi sezione "Reimpostare il PIN" nel README) — al riavvio potrai crearne uno nuovo' +
+    '</div></div></div>' +
+    '<div class="card"><div class="card-label">Aggiornamenti</div>' +
+    '<div id="updateStatusArea" style="margin-top:6px;"><div style="font-size:12px;color:var(--text3);">Controllo...</div></div>' +
+    '<button class="btn btn-sm" id="btnCheckUpdates" style="margin-top:8px;">Controlla</button></div>' +
+    '<div class="card"><div class="card-label">Performance</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:4px;">Tier: ' + V.tier + '</div></div>' +
+    '<div class="card"><div class="card-label">Sicurezza</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:4px;">Safe Mode: ' + (V.safeMode ? 'Attivo' : 'Disattivo') + '</div></div>' +
+    '<div class="card"><div class="card-label">Info</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:4px;line-height:1.6;">VAMPJRO v' + esc(V.version) + '<br>' +
+    '<a href="https://t.me/vampjro" style="color:var(--accent);text-decoration:none;">t.me/vampjro</a></div></div>' +
+    '<div class="card" id="privacyToggle" style="cursor:pointer;"><div class="card-label">Privacy</div>' +
+    '<div style="font-size:11px;color:var(--text4);margin-top:2px;">I tuoi dati restano sul tuo PC</div></div>' +
+    '<div id="privacyContent" style="display:none;margin-top:4px;"><div class="card" style="padding:14px;">' +
+    '<div style="font-size:12px;color:var(--text3);line-height:1.6;">VAMPJRO non invia dati a server esterni.<br><br>' +
+    'Nessun dato esce dalla rete locale. L\'unica connessione esterna è il controllo aggiornamenti (lettura Gist GitHub pubblico, nessun dato personale inviato).<br><br>' +
+    '<strong style="color:var(--text2);">Zero telemetria. Zero analytics. Zero tracking.</strong></div></div></div>';
+  document.getElementById('privacyToggle').onclick = () => {
+    const c = document.getElementById('privacyContent');
+    c.style.display = c.style.display === 'none' ? 'block' : 'none';
+  };
+  document.getElementById('troubleshootToggle').onclick = () => {
+    const c = document.getElementById('troubleshootContent');
+    c.style.display = c.style.display === 'none' ? 'block' : 'none';
+  };
+  document.getElementById('btnCopyConnectUrl').onclick = () => {
+    haptic();
+    const url = document.getElementById('connectUrlBox').textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast('Indirizzo copiato')).catch(() => toast('Copia non riuscita'));
+    } else {
+      toast('Copia manuale non disponibile su questo browser');
+    }
+  };
+  document.getElementById('btnCheckUpdates').onclick = () => {
+    haptic();
+    document.getElementById('updateStatusArea').innerHTML = '<div style="font-size:12px;color:var(--text3);">Controllo in corso...</div>';
+    document.getElementById('btnCheckUpdates').disabled = true;
+    wsSend({ type: 'checkUpdates' });
+  };
+  wsSend({ type: 'getUpdateStatus' });
+}
+
+function renderUpdateStatus(data) {
+  const area = document.getElementById('updateStatusArea');
+  const btn = document.getElementById('btnCheckUpdates');
+  if (!area) return;
+  if (btn) btn.disabled = false;
+  if (!data) { area.innerHTML = '<div style="font-size:12px;color:var(--text3);">Stato sconosciuto</div>'; return; }
+  const ver = esc(data.currentVersion || V.version);
+  const canDownload = data.status === 'available' || data.status === 'critical';
+  let html = '';
+  if (data.status === 'up_to_date') html = '<div style="font-size:12px;color:var(--green);">Aggiornato — v' + ver + '</div>';
+  else if (data.status === 'available') html = '<div style="font-size:12px;color:var(--accent);">Disponibile v' + esc(data.latestVersion) + '</div><div style="font-size:11px;color:var(--text4);margin-top:2px;">Attuale: v' + ver + '</div>' + (data.releaseNotes ? '<div style="font-size:11px;color:var(--text3);margin-top:4px;padding:6px 8px;background:var(--bg3);border-radius:6px;">' + esc(data.releaseNotes) + '</div>' : '');
+  else if (data.status === 'critical') html = '<div style="font-size:12px;color:var(--red);font-weight:600;">Aggiornamento critico: v' + esc(data.latestVersion) + '</div>';
+  else if (data.status === 'no_gist') html = '<div style="font-size:12px;color:var(--text4);">Server aggiornamenti non configurato</div><div style="font-size:11px;color:var(--text4);margin-top:1px;">v' + ver + '</div>';
+  else if (data.status === 'error') html = '<div style="font-size:12px;color:var(--yellow);">' + esc(data.message) + '</div>';
+  else html = '<div style="font-size:12px;color:var(--text3);">' + esc(data.message || 'Sconosciuto') + '</div>';
+  if (data.lastCheck) html += '<div style="font-size:10px;color:var(--text4);margin-top:3px;">Ultimo: ' + new Date(data.lastCheck).toLocaleString('it-IT') + '</div>';
+  if (canDownload) html += '<button id="btnDownloadUpdate" style="margin-top:8px;width:100%;padding:10px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;">Scarica aggiornamento</button>';
+  html += '<div id="downloadStatusArea"></div>';
+  area.innerHTML = html;
+  if (canDownload) {
+    document.getElementById('btnDownloadUpdate').onclick = () => {
+      haptic();
+      document.getElementById('btnDownloadUpdate').disabled = true;
+      document.getElementById('downloadStatusArea').innerHTML = '<div style="font-size:11px;color:var(--text3);margin-top:6px;">Download e verifica in corso...</div>';
+      wsSend({ type: 'downloadUpdate' });
+    };
+  }
+}
+
+function renderDownloadStatus(data) {
+  const el = document.getElementById('downloadStatusArea');
+  if (!el || !data) return;
+  const btn = document.getElementById('btnDownloadUpdate');
+  if (data.status === 'ready') {
+    el.innerHTML = '<div style="font-size:11px;color:var(--green);margin-top:6px;">Aggiornamento verificato (SHA-256 corrisponde)</div>' +
+      '<button id="btnInstallUpdate" style="margin-top:6px;width:100%;padding:10px;background:var(--red);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;">Installa ora</button>';
+    document.getElementById('btnInstallUpdate').onclick = async () => {
+      haptic();
+      const ok = await confirm('Installa aggiornamento v' + esc(data.version), 'VAMPJRO si chiuderà e l\'installer partirà. Dovrai riaprire l\'app al termine.');
+      if (ok) wsSend({ type: 'installUpdate' });
+    };
+  } else if (data.status === 'error') {
+    if (btn) btn.disabled = false;
+    el.innerHTML = '<div style="font-size:11px;color:var(--red);margin-top:6px;">' + esc(data.error || 'Download fallito') + '</div>';
+  } else if (data.status === 'downloading' || data.status === 'verifying') {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-top:6px;">' + (data.status === 'downloading' ? 'Download in corso...' : 'Verifica integrità...') + '</div>';
+  }
+}
+
+function updateMusicStatus(data) {
+  const widget = document.getElementById('musicWidget');
+  const badge = document.getElementById('musicStatusBadge');
+  const desc = document.getElementById('musicStatusDesc');
+  if (data?.connected) {
+    widget.style.display = 'block';
+    document.getElementById('musicBadge').textContent = 'Connesso';
+    document.getElementById('musicBadge').className = 'badge badge-green';
+    if (badge) { badge.textContent = 'Connesso'; badge.className = 'badge badge-green'; }
+    if (desc) desc.textContent = 'Telecomando attivo';
+    if (data.state?.nowPlaying) {
+      const np = data.state.nowPlaying;
+      document.getElementById('musicCardContent').innerHTML =
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+        (np.artwork ? '<img src="' + np.artwork + '" style="width:40px;height:40px;border-radius:6px;object-fit:cover;" onerror="this.style.display=\'none\'">' : '') +
+        '<div style="min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(np.title) + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);">' + esc(np.artist) + '</div></div></div>';
+    }
+  } else {
+    widget.style.display = 'none';
+    if (badge) { badge.textContent = 'Offline'; badge.className = 'badge badge-muted'; }
+    if (desc) desc.textContent = 'Telecomando';
+  }
+}
+
+let discordData = null;
+let questLastSnapshot = null;
+let questLog = [];
+const questSectionsCollapsed = { inProgress: false, toComplete: true, completed: true, log: true };
+
+function questLogPush(sev, msg) {
+  questLog.push({ ts: new Date(), sev, msg });
+  if (questLog.length > 40) questLog.shift();
+}
+
+function updateQuestLog(bridge) {
+  const prev = questLastSnapshot;
+  if (!bridge && prev) {
+    questLogPush('warning', 'Quest Bridge disconnesso');
+  } else if (bridge && !prev) {
+    questLogPush('success', 'Quest Bridge connesso');
+  } else if (bridge && prev) {
+    if (bridge.questsCompleted > prev.questsCompleted) {
+      const prevNames = new Set((prev.completed || []).map(q => q.name));
+      const fresh = (bridge.completed || []).find(q => !prevNames.has(q.name));
+      questLogPush('success', fresh ? `Quest completata: ${fresh.name}${fresh.rewardText ? ' (+' + fresh.rewardText + ')' : ''}` : 'Quest completata');
+    }
+    if (bridge.orbsEarned > prev.orbsEarned) {
+      questLogPush('info', `Orbs totali aggiornati: +${bridge.orbsEarned - prev.orbsEarned}`);
+    }
+  }
+  questLastSnapshot = bridge || null;
+}
+
+function formatAge(ms) {
+  if (ms == null) return '';
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return s + 's fa';
+  const m = Math.floor(s / 60);
+  return m + 'm fa';
+}
+
+function questProgressColor(pct) { return pct >= 100 ? 'var(--green)' : 'var(--accent)'; }
+
+function renderQuestCenter(d) {
+  const bridge = d.questBridge;
+  updateQuestLog(bridge);
+
+  if (!bridge) {
+    return '<div class="card-label" style="margin:16px 0 10px;">Quest Center</div>' +
+      '<div class="empty-state" style="padding:20px;"><div class="empty-state-title">Quest Bridge offline</div>' +
+      '<div class="empty-state-msg">Verifica che Discord Canary sia aperto e che il plugin VampjroQuestBridge sia attivo in Vencord.</div></div>';
+  }
+
+  if (!bridge.ok) {
+    return '<div class="card-label" style="margin:16px 0 10px;">Quest Center</div>' +
+      '<div class="empty-state" style="padding:20px;"><div class="empty-state-title">In attesa di Discord...</div>' +
+      '<div class="empty-state-msg">Il bridge è connesso ma non ha ancora dati quest disponibili.</div></div>';
+  }
+
+  const remaining = Math.max(0, bridge.questsTotal - bridge.questsCompleted);
+  const overallPct = bridge.questsTotal > 0 ? Math.round((bridge.questsCompleted / bridge.questsTotal) * 100) : 0;
+  const ageMs = d.questBridgeAgeMs;
+  const stale = ageMs != null && ageMs > 90000;
+
+  let html = '<div class="card-label" style="margin:16px 0 10px;">Quest Center</div>';
+
+  html += '<div class="card"><div class="quest-overview">' +
+    '<div class="quest-stat"><div class="quest-stat-num">' + bridge.questsCompleted + '</div><div class="quest-stat-label">Completate</div></div>' +
+    '<div class="quest-stat"><div class="quest-stat-num">' + bridge.questsActive + '</div><div class="quest-stat-label">In corso</div></div>' +
+    '<div class="quest-stat"><div class="quest-stat-num">' + remaining + '</div><div class="quest-stat-label">Rimanenti</div></div>' +
+    '<div class="quest-stat"><div class="quest-stat-num">' + bridge.questsClaimable + '</div><div class="quest-stat-label">Da riscattare</div></div>' +
+    '</div>' +
+    '<div class="progress" style="margin-top:12px;"><div class="progress-fill" style="width:' + overallPct + '%;background:var(--accent);"></div></div>' +
+    '<div style="font-size:11px;color:var(--text3);margin-top:5px;text-align:center;">' + overallPct + '% completato</div>' +
+    (bridge.orbsEarned > 0 ? '<div class="quest-orbs-banner"><span class="quest-orb-dot"></span>' + bridge.orbsEarned.toLocaleString('it-IT') + ' Orbs guadagnati</div>' : '') +
+    '<div class="quest-age' + (stale ? ' stale' : '') + '">Aggiornato ' + formatAge(ageMs) + (stale ? ' · possibile disconnessione' : '') + '</div>' +
+    '</div>';
+
+  // In progress
+  const ip = bridge.inProgress || [];
+  html += '<div class="quest-section-head' + (questSectionsCollapsed.inProgress ? ' collapsed' : '') + '" data-qsec="inProgress">' +
+    '<div class="quest-section-head-title">In corso (' + ip.length + ')</div><div class="chev">▾</div></div>';
+  html += '<div class="quest-section-body' + (questSectionsCollapsed.inProgress ? ' collapsed' : '') + '" data-qbody="inProgress">';
+  if (!ip.length) {
+    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessuna quest in corso</div>';
+  } else {
+    ip.forEach(q => {
+      html += '<div class="quest-card"><div class="quest-card-top">' +
+        '<div><div class="quest-name">' + esc(q.name) + '</div><div class="quest-kind">' + esc(q.kind) + '</div></div>' +
+        (q.rewardText ? '<span class="quest-orb-tag">' + (q.isOrbs ? '<span class="quest-orb-dot"></span>' : '') + esc(q.rewardText) + '</span>' : '') +
+        '</div>' +
+        '<div class="progress"><div class="progress-fill" style="width:' + q.percent + '%;background:' + questProgressColor(q.percent) + ';"></div></div>' +
+        '<div class="quest-meta"><span>' + q.current + ' / ' + q.target + '</span><span>' + q.percent + '%</span></div>' +
+        '</div>';
+    });
+  }
+  html += '</div>';
+
+  // To complete
+  const tc = bridge.toComplete || [];
+  html += '<div class="quest-section-head' + (questSectionsCollapsed.toComplete ? ' collapsed' : '') + '" data-qsec="toComplete">' +
+    '<div class="quest-section-head-title">Da completare (' + tc.length + ')</div><div class="chev">▾</div></div>';
+  html += '<div class="quest-section-body' + (questSectionsCollapsed.toComplete ? ' collapsed' : '') + '" data-qbody="toComplete">';
+  if (!tc.length) {
+    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessuna quest disponibile</div>';
+  } else {
+    tc.forEach(q => {
+      html += '<div class="quest-card" style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div class="quest-name">' + esc(q.name) + '</div>' +
+        (q.rewardText ? '<span class="quest-orb-tag">' + (q.isOrbs ? '<span class="quest-orb-dot"></span>' : '') + esc(q.rewardText) + '</span>' : '') +
+        '</div>';
+    });
+  }
+  html += '</div>';
+
+  // Completed
+  const cl = bridge.completed || [];
+  html += '<div class="quest-section-head' + (questSectionsCollapsed.completed ? ' collapsed' : '') + '" data-qsec="completed">' +
+    '<div class="quest-section-head-title">Completate (' + cl.length + ')</div><div class="chev">▾</div></div>';
+  html += '<div class="quest-section-body' + (questSectionsCollapsed.completed ? ' collapsed' : '') + '" data-qbody="completed">';
+  if (!cl.length) {
+    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessuna quest completata</div>';
+  } else {
+    html += '<div class="card">' + cl.map(q =>
+      '<div class="quest-completed-row"><div class="quest-completed-name"><span class="quest-check">✓</span><span>' + esc(q.name) + '</span></div>' +
+      (q.rewardText ? '<span class="quest-orb-tag">' + (q.isOrbs ? '<span class="quest-orb-dot"></span>' : '') + esc(q.rewardText) + '</span>' : '') +
+      '</div>'
+    ).join('') + '</div>';
+  }
+  html += '</div>';
+
+  // Activity log
+  html += '<div class="quest-section-head' + (questSectionsCollapsed.log ? ' collapsed' : '') + '" data-qsec="log">' +
+    '<div class="quest-section-head-title">Attività</div><div class="chev">▾</div></div>';
+  html += '<div class="quest-section-body' + (questSectionsCollapsed.log ? ' collapsed' : '') + '" data-qbody="log">';
+  if (!questLog.length) {
+    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessun evento registrato</div>';
+  } else {
+    const sevMark = { info: 'i', success: '✓', warning: '!', error: '×' };
+    html += '<div class="card quest-log">' + questLog.slice().reverse().map(l =>
+      '<div class="quest-log-line"><span class="quest-log-ts">' + l.ts.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>' +
+      '<span class="quest-log-sev ' + l.sev + '">' + sevMark[l.sev] + '</span><span>' + esc(l.msg) + '</span></div>'
+    ).join('') + '</div>';
+  }
+  html += '</div>';
+
+  return html;
+}
+
+function bindQuestSectionToggles(el) {
+  el.querySelectorAll('[data-qsec]').forEach(head => {
+    head.onclick = () => {
+      const key = head.getAttribute('data-qsec');
+      questSectionsCollapsed[key] = !questSectionsCollapsed[key];
+      head.classList.toggle('collapsed', questSectionsCollapsed[key]);
+      const body = el.querySelector('[data-qbody="' + key + '"]');
+      if (body) body.classList.toggle('collapsed', questSectionsCollapsed[key]);
+    };
+  });
+}
+
+function renderDiscord(data) {
+  if (!data) return;
+  discordData = data;
+  const badge = document.getElementById('discordBadge');
+  const info = document.getElementById('discordInfo');
+  const card = document.getElementById('discordCard');
+
+  if (data.canaryRunning) {
+    badge.textContent = 'Online'; badge.className = 'badge badge-green';
+    let details = [];
+    if (data.vencordInstalled) details.push('Vencord');
+    if (data.orionPlugin?.installed && data.orionPlugin.enabled) details.push('Orion' + (data.orionVersion ? ' ' + data.orionVersion : ''));
+    else if (data.orionPlugin?.installed) details.push('Orion (disattivato)');
+    else if (data.orionAvailable) details.push('Orion script');
+    info.textContent = 'Canary' + (details.length ? ' + ' + details.join(' + ') : '');
+  } else if (data.canaryInstalled) {
+    badge.textContent = 'Offline'; badge.className = 'badge badge-yellow';
+    info.textContent = 'Installato, non in esecuzione';
+  } else {
+    badge.textContent = 'Non trovato'; badge.className = 'badge badge-muted';
+    info.textContent = 'Discord Canary non rilevato';
+  }
+
+  card.style.cursor = 'pointer';
+  card.onclick = () => { haptic(); openSub('discord-wizard'); };
+}
+
+function renderDiscordWizard(el) {
+  const d = discordData;
+  if (!d) { el.innerHTML = '<div class="card-label" style="margin-bottom:10px;">Discord</div><div class="empty-state"><div class="empty-state-title">Dati non disponibili</div><div class="empty-state-msg">Torna alla pagina App per caricare lo stato Discord.</div></div>'; return; }
+
+  let html = '<div class="card-label" style="margin-bottom:12px;">Discord Quest Automation</div>';
+
+  const steps = [
+    { num: 1, title: 'Discord Canary', ok: d.canaryInstalled, running: d.canaryRunning,
+      okMsg: d.canaryRunning ? 'Installato e in esecuzione' : 'Installato, non in esecuzione',
+      failMsg: 'Non trovato. Discord Canary è necessario per le Quest.' },
+    { num: 2, title: 'Vencord', ok: d.vencordInstalled,
+      okMsg: 'Installato',
+      failMsg: 'Non trovato. Vencord è un mod client per Discord che permette di installare plugin.' },
+    { num: 3, title: 'Orion Plugin', ok: d.orionPlugin?.installed && d.orionPlugin?.enabled,
+      partial: d.orionPlugin?.installed && !d.orionPlugin?.enabled,
+      okMsg: 'Installato e attivo' + (d.orionVersion ? ' (v' + esc(d.orionVersion) + ')' : ''),
+      partialMsg: 'Installato ma disattivato. Attivalo dalle impostazioni Vencord.',
+      failMsg: 'Non trovato. Il plugin OrionQuests automatizza le Discord Quest.' },
+    { num: 4, title: 'Verifica', ok: d.canaryInstalled && d.vencordInstalled && d.orionPlugin?.installed && d.orionPlugin?.enabled,
+      okMsg: 'Configurazione completa',
+      failMsg: 'Configurazione incompleta. Completa i passaggi precedenti.' }
+  ];
+
+  steps.forEach(s => {
+    const cls = s.ok ? 'done' : (s.partial ? '' : 'fail');
+    const icon = s.ok ? '✓' : (s.partial ? '!' : s.num);
+    const msg = s.ok ? s.okMsg : (s.partial ? s.partialMsg : s.failMsg);
+    html += '<div class="wizard-step"><div class="wizard-step-header">' +
+      '<div class="wizard-step-num ' + cls + '">' + icon + '</div>' +
+      '<div class="wizard-step-title">' + s.title + '</div></div>' +
+      '<div class="wizard-step-body">' + msg + '</div></div>';
+  });
+
+  if (d.orionPlugin?.installed && d.orionPlugin?.enabled) {
+    html += '<div class="card" style="margin-top:10px;"><div class="card-label">Configurazione Orion</div>' +
+      '<div style="font-size:12px;color:var(--text3);margin-top:4px;line-height:1.6;">' +
+      'Auto Start: ' + (d.orionPlugin.autoStart ? 'Sì' : 'No') + '<br>' +
+      'Claim Reward: ' + (d.orionPlugin.tryToClaimReward ? 'Sì' : 'No') + '<br>' +
+      'Game Concurrency: ' + (d.orionPlugin.gameConcurrency || 1) + '<br>' +
+      'Video Concurrency: ' + (d.orionPlugin.videoConcurrency || 2) + '</div></div>';
+  }
+
+  if (d.canaryRunning) html += renderQuestCenter(d);
+
+  html += '<button class="btn btn-sm" id="discordRecheck" style="margin-top:10px;width:100%;">Ricontrolla</button>';
+  el.innerHTML = html;
+  bindQuestSectionToggles(el);
+
+  document.getElementById('discordRecheck').onclick = () => {
+    wsSend({ type: 'getDiscordStatus' });
+  };
+
+  // Tear down the previous render's listener/timer before installing new ones,
+  // otherwise every re-render (triggered by the handler itself) stacks another pair.
+  if (window._subCleanup) window._subCleanup();
+
+  const msgHandler = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'getDiscordStatusResult') {
+      discordData = msg.data;
+      renderDiscordWizard(el);
+    }
+  };
+  V.ws.addEventListener('message', msgHandler);
+
+  const refreshTimer = setInterval(() => wsSend({ type: 'getDiscordStatus' }), 30000);
+  window._subCleanup = () => {
+    clearInterval(refreshTimer);
+    V.ws.removeEventListener('message', msgHandler);
+  };
+}
+
+document.getElementById('goMusic').onclick = () => { haptic(); window.open('/music.html', '_blank'); };
+document.getElementById('goClipboard').onclick = () => { haptic(); openSub('clipboard'); };
+document.getElementById('goWindows').onclick = () => { haptic(); openSub('windows'); };
+document.getElementById('goNetwork').onclick = () => { haptic(); openSub('network'); };
+document.getElementById('goStorage').onclick = () => { haptic(); openSub('storage'); };
+document.getElementById('goCrash').onclick = () => { haptic(); openSub('crash'); };
+document.getElementById('goAudio').onclick = () => { haptic(); openSub('audio'); };
+document.getElementById('goTerminal').onclick = () => { haptic(); openSub('terminal'); };
+document.getElementById('goSettings').onclick = () => { haptic(); openSub('settings'); };
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function formatBytes(b) { if (!b || b <= 0) return '0 B'; const u = ['B','KB','MB','GB','TB']; const i = Math.floor(Math.log(b) / Math.log(1024)); return (b / Math.pow(1024, i)).toFixed(1) + ' ' + u[i]; }
+function formatUptime(s) { const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60); if (d > 0) return d + 'g ' + h + 'h'; if (h > 0) return h + 'h ' + m + 'm'; return m + 'm'; }
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+wsConnect();
+
+})();
+</script>
+</body>
+</html>

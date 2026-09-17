@@ -1,0 +1,70 @@
+{
+  "server": {
+    "port": 3000,
+    "host": "0.0.0.0"
+  },
+  "security": {
+    "pinHash": null,
+    "trustedDevices": [],
+    "sessionTTL": 86400000,
+    "maxFailedAttempts": 5,
+    "cooldownMs": 60000,
+    "safeMode": false
+  },
+  "performance": {
+    "profile": "auto",
+    "tier": null
+  },
+  "modules": {
+    "system": true,
+    "processes": true,
+    "controls": true,
+    "screenshot": true,
+    "crashLogs": true,
+    "clipboard": true,
+    "windows": true,
+    "network": true,
+    "audio": true,
+    "terminal": true,
+    "keepAwake": true,
+    "discord": false,
+    "music": true,
+    "storage": true,
+    "updates": true,
+    "backendConnector": false
+  },
+  "intervals": {
+    "low": {
+      "system": 5000,
+      "processes": 10000,
+      "network": 10000
+    },
+    "medium": {
+      "system": 3000,
+      "processes": 6000,
+      "network": 6000
+    },
+    "high": {
+      "system": 2000,
+      "processes": 4000,
+      "network": 4000
+    }
+  },
+  "updates": {
+    "checkInterval": 86400000,
+    "channel": "stable",
+    "gistId": null
+  },
+  "backend": {
+    "url": null,
+    "clientId": null,
+    "secret": null,
+    "healthInterval": 60000
+  },
+  "branding": {
+    "name": "VAMPJRO",
+    "product": "Remote Control Center",
+    "support": "t.me/vampjro",
+    "version": "1.0.0"
+  }
+}

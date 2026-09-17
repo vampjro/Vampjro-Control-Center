@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Apple Music Remote",
+  "version": "1.0.1",
+  "description": "WebSocket bridge for remote-controlling Apple Music Web",
+  "permissions": ["storage"],
+  "host_permissions": ["ws://localhost:3000/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://music.apple.com/*"],
+      "js": ["inject.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://music.apple.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
