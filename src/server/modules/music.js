@@ -1,4 +1,21 @@
 const logger = require('../core/logger');
+const { exec } = require('child_process');
+
+// Apple Music here is the web player (music.apple.com) controlled through
+// the browser extension in src/extension/, which matches that exact URL —
+// there is no native Windows app being launched.
+const APPLE_MUSIC_URL = 'https://music.apple.com';
+
+function openWebPlayer() {
+  try {
+    exec(`start "" "${APPLE_MUSIC_URL}"`, err => {
+      if (err) logger.error('Failed to open Apple Music web player', { error: err.message });
+    });
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
 
 let playerSocket = null;
 let lastState = null;
@@ -61,7 +78,8 @@ function wsHandlers() {
     getMusicStatus: () => ({
       connected: isPlayerConnected(),
       state: lastState
-    })
+    }),
+    openMusicPlayer: () => openWebPlayer()
   };
 }
 

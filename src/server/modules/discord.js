@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const logger = require('../core/logger');
 
 let orionScriptPath = null;
@@ -50,8 +50,25 @@ function stop() {
   if (questBridgeTimer) { clearInterval(questBridgeTimer); questBridgeTimer = null; }
 }
 
+function getCanaryDir() {
+  return path.join(process.env.LOCALAPPDATA || '', 'DiscordCanary');
+}
+
 function checkCanaryInstalled() {
-  return fs.existsSync(path.join(process.env.LOCALAPPDATA || '', 'DiscordCanary'));
+  return fs.existsSync(getCanaryDir());
+}
+
+function launchCanary() {
+  const exePath = path.join(getCanaryDir(), 'DiscordCanary.exe');
+  if (!fs.existsSync(exePath)) return { ok: false, error: 'Discord Canary non trovato su questo PC.' };
+  try {
+    spawn(exePath, [], { detached: true, stdio: 'ignore', cwd: path.dirname(exePath) }).unref();
+    logger.info('Launched Discord Canary');
+    return { ok: true };
+  } catch (err) {
+    logger.error('Failed to launch Discord Canary', { error: err.message });
+    return { ok: false, error: err.message };
+  }
 }
 
 function checkVencordInstalled() {
@@ -120,7 +137,8 @@ function health() {
 
 function wsHandlers() {
   return {
-    getDiscordStatus: async () => await getStatus()
+    getDiscordStatus: async () => await getStatus(),
+    launchDiscord: () => launchCanary()
   };
 }
 

@@ -541,6 +541,8 @@ function handleMessage(msg) {
     case 'checkUpdatesResult': case 'getUpdateStatusResult': renderUpdateStatus(msg.data); break;
     case 'downloadUpdateResult': case 'getDownloadStatusResult': renderDownloadStatus(msg.data); break;
     case 'installUpdateResult': if (!msg.data.ok) toast(msg.data.error || 'Installazione fallita'); break;
+    case 'launchDiscordResult': if (!msg.data.ok) toast(msg.data.error || 'Apertura Discord fallita'); break;
+    case 'openMusicPlayerResult': if (!msg.data.ok) toast(msg.data.error || 'Apertura Apple Music fallita'); break;
     case 'getBackendStatusResult': updateManagedIndicator(msg.data); break;
     case 'error': toast(msg.error || 'Errore'); break;
     case 'permissionDenied': toast('Bloccato: ' + (msg.reason || 'Safe Mode')); break;
@@ -1119,7 +1121,10 @@ function renderDownloadStatus(data) {
   }
 }
 
+let musicConnected = false;
+
 function updateMusicStatus(data) {
+  musicConnected = !!data?.connected;
   const widget = document.getElementById('musicWidget');
   const badge = document.getElementById('musicStatusBadge');
   const desc = document.getElementById('musicStatusDesc');
@@ -1372,9 +1377,23 @@ function renderDiscordWizard(el) {
 
   if (d.canaryRunning) html += renderQuestCenter(d);
 
+  if (d.canaryInstalled && !d.canaryRunning) {
+    html += '<button class="btn btn-sm" id="discordLaunch" style="margin-top:10px;width:100%;background:var(--accent);color:#fff;">Apri Discord Canary</button>';
+  }
   html += '<button class="btn btn-sm" id="discordRecheck" style="margin-top:10px;width:100%;">Ricontrolla</button>';
   el.innerHTML = html;
   bindQuestSectionToggles(el);
+
+  const launchBtn = document.getElementById('discordLaunch');
+  if (launchBtn) {
+    launchBtn.onclick = () => {
+      haptic();
+      launchBtn.disabled = true;
+      launchBtn.textContent = 'Apertura...';
+      wsSend({ type: 'launchDiscord' });
+      setTimeout(() => wsSend({ type: 'getDiscordStatus' }), 3000);
+    };
+  }
 
   document.getElementById('discordRecheck').onclick = () => {
     wsSend({ type: 'getDiscordStatus' });
@@ -1400,7 +1419,12 @@ function renderDiscordWizard(el) {
   };
 }
 
-document.getElementById('goMusic').onclick = () => { haptic(); window.open('/music.html', '_blank'); };
+document.getElementById('goMusic').onclick = () => {
+  haptic();
+  if (musicConnected) { window.open('/music.html', '_blank'); return; }
+  wsSend({ type: 'openMusicPlayer' });
+  toast('Apertura Apple Music sul PC...');
+};
 document.getElementById('goClipboard').onclick = () => { haptic(); openSub('clipboard'); };
 document.getElementById('goWindows').onclick = () => { haptic(); openSub('windows'); };
 document.getElementById('goNetwork').onclick = () => { haptic(); openSub('network'); };

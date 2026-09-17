@@ -43,6 +43,8 @@ const ACTION_LEVELS = {
   minimizeWindow: LEVELS.CONTROL,
   maximizeWindow: LEVELS.CONTROL,
   downloadUpdate: LEVELS.CONTROL,
+  launchDiscord: LEVELS.CONTROL,
+  openMusicPlayer: LEVELS.CONTROL,
 
   killProcess: LEVELS.DANGEROUS,
   closeWindow: LEVELS.DANGEROUS,
