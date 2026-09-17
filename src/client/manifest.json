@@ -4,8 +4,8 @@
   "description": "Control your PC from your iPhone",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
   "orientation": "portrait",
   "icons": [
     {

@@ -178,7 +178,11 @@ panelWss.on('connection', (ws, req) => {
         protocol.safeSend(client, { type: 'error', error: err.message, action: msg.type, requestId: msg.requestId });
       }
     } else {
-      protocol.safeSend(client, { type: 'error', error: `Unknown: ${msg.type}`, requestId: msg.requestId });
+      // The action passed permission checks but its owning module isn't
+      // running (e.g. disabled in config) — distinct from a handler that
+      // threw, so the client can show "not available" instead of a raw
+      // technical error for routine background status checks.
+      protocol.safeSend(client, { type: 'error', error: 'module_unavailable', action: msg.type, requestId: msg.requestId });
     }
   });
 
