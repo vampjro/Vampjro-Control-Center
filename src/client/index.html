@@ -156,31 +156,49 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
 .wizard-step-title { font-size:13px; font-weight:500; }
 .wizard-step-body { font-size:12px; color:var(--text2); margin-left:30px; line-height:1.5; }
 
+.quest-hero { padding:16px; }
 .quest-overview { display:flex; gap:8px; }
-.quest-stat { text-align:center; flex:1; background:var(--bg3); border-radius:var(--radius-sm); padding:10px 4px; }
-.quest-stat-num { font-size:18px; font-weight:700; color:var(--text); line-height:1.1; }
-.quest-stat-label { font-size:9.5px; color:var(--text3); text-transform:uppercase; letter-spacing:.4px; margin-top:3px; }
-.quest-orbs-banner { display:flex; align-items:center; justify-content:center; gap:6px; background:var(--yellowBg); border-radius:var(--radius-sm); padding:8px; margin-top:8px; font-size:13px; font-weight:700; color:var(--yellow); }
-.quest-orb-dot { width:8px; height:8px; border-radius:50%; background:var(--yellow); flex-shrink:0; }
-.quest-orb-tag { display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:600; color:var(--yellow); white-space:nowrap; flex-shrink:0; }
-.quest-orb-tag .quest-orb-dot { width:6px; height:6px; }
-.quest-section-head { display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:8px 2px; user-select:none; }
-.quest-section-head-title { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.6px; }
-.quest-section-head .chev { transition:transform .2s; color:var(--text4); font-size:10px; }
-.quest-section-head.collapsed .chev { transform:rotate(-90deg); }
-.quest-section-body { max-height:360px; overflow-y:auto; }
-.quest-section-body.collapsed { display:none; }
-.quest-card { background:var(--bg3); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:7px; }
-.quest-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; }
-.quest-name { font-size:12.5px; font-weight:500; color:var(--text); line-height:1.3; }
-.quest-kind { font-size:10.5px; color:var(--text3); margin-top:1px; }
-.quest-meta { display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text3); margin-top:6px; }
-.quest-completed-row { display:flex; justify-content:space-between; align-items:center; padding:7px 2px; border-bottom:1px solid var(--border); font-size:12px; }
+.quest-stat { text-align:center; flex:1; background:var(--bg4); border-radius:var(--radius-sm); padding:12px 4px; }
+.quest-stat-num { font-size:22px; font-weight:800; color:var(--text); line-height:1.1; }
+.quest-stat-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.4px; margin-top:4px; }
+.quest-progress-track { height:8px; border-radius:99px; background:var(--bg4); margin-top:14px; overflow:hidden; }
+.quest-progress-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .3s; }
+.quest-progress-pct { font-size:12px; color:var(--text2); font-weight:600; margin-top:6px; text-align:center; }
+.quest-orbs-banner { display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,rgba(234,179,8,.16),rgba(249,115,22,.10)); border:1px solid rgba(234,179,8,.28); border-radius:var(--radius-sm); padding:11px; margin-top:12px; font-size:14px; font-weight:700; color:#f5c542; }
+.quest-orb-icon { font-size:15px; flex-shrink:0; }
+.quest-orb-tag { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:#f5c542; white-space:nowrap; flex-shrink:0; background:rgba(234,179,8,.12); padding:3px 7px; border-radius:99px; }
+.quest-age { font-size:10.5px; color:var(--text4); text-align:center; margin-top:10px; }
+.quest-age.stale { color:var(--yellow); }
+
+.quest-tabs { display:flex; gap:6px; margin:14px 0 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.quest-tabs::-webkit-scrollbar { display:none; }
+.quest-tab { flex-shrink:0; display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:99px; background:var(--bg3); font-size:12.5px; font-weight:600; color:var(--text3); cursor:pointer; user-select:none; transition:background .15s,color .15s; }
+.quest-tab .qt-count { font-size:10.5px; font-weight:700; background:var(--bg4); color:var(--text3); border-radius:99px; padding:1px 6px; }
+.quest-tab.active { background:var(--accent); color:#fff; }
+.quest-tab.active .qt-count { background:rgba(255,255,255,.22); color:#fff; }
+
+.quest-list { display:flex; flex-direction:column; gap:8px; }
+.quest-card { background:var(--bg3); border-radius:var(--radius); padding:13px 14px; display:flex; gap:11px; align-items:flex-start; }
+.quest-icon { width:34px; height:34px; border-radius:10px; background:var(--accentBg); color:var(--accent2); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.quest-card-main { flex:1; min-width:0; }
+.quest-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:2px; }
+.quest-name { font-size:13.5px; font-weight:600; color:var(--text); line-height:1.35; }
+.quest-kind { font-size:11px; color:var(--text3); margin-top:2px; }
+.quest-meta { display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--text3); margin-top:8px; }
+.quest-mini-track { height:6px; border-radius:99px; background:var(--bg4); margin-top:8px; overflow:hidden; }
+.quest-mini-fill { height:100%; border-radius:99px; transition:width .3s; }
+
+.quest-completed-row { display:flex; justify-content:space-between; align-items:center; padding:10px 2px; border-bottom:1px solid var(--border); font-size:13px; }
 .quest-completed-row:last-child { border-bottom:none; }
-.quest-completed-name { display:flex; align-items:center; gap:6px; color:var(--text2); min-width:0; }
+.quest-completed-name { display:flex; align-items:center; gap:8px; color:var(--text2); min-width:0; }
 .quest-completed-name span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.quest-check { color:var(--green); flex-shrink:0; font-size:13px; }
-.quest-log { font-family:'SF Mono',Menlo,'Cascadia Code',monospace; font-size:10.5px; line-height:1.7; max-height:180px; overflow-y:auto; }
+.quest-check { flex-shrink:0; width:18px; height:18px; border-radius:50%; background:var(--greenBg); color:var(--green); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+
+.quest-empty { text-align:center; padding:28px 16px; color:var(--text4); }
+.quest-empty-icon { font-size:26px; margin-bottom:8px; opacity:.6; }
+.quest-empty-msg { font-size:12.5px; color:var(--text3); }
+
+.quest-log { font-family:'SF Mono',Menlo,'Cascadia Code',monospace; font-size:10.5px; line-height:1.7; max-height:220px; overflow-y:auto; }
 .quest-log-line { display:flex; gap:6px; }
 .quest-log-ts { color:var(--text4); flex-shrink:0; }
 .quest-log-sev { flex-shrink:0; width:15px; font-weight:700; }
@@ -188,8 +206,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
 .quest-log-sev.success { color:var(--green); }
 .quest-log-sev.warning { color:var(--yellow); }
 .quest-log-sev.error { color:var(--red); }
-.quest-age { font-size:10.5px; color:var(--text4); text-align:right; margin-top:6px; }
-.quest-age.stale { color:var(--yellow); }
 
 @media(max-width:374px) {
   .page-title { font-size:22px; }
@@ -1152,7 +1168,16 @@ function updateMusicStatus(data) {
 let discordData = null;
 let questLastSnapshot = null;
 let questLog = [];
-const questSectionsCollapsed = { inProgress: false, toComplete: true, completed: true, log: true };
+let questActiveTab = 'inProgress';
+let lastQuestBridge = null;
+
+function questIconFor(kind) {
+  const k = (kind || '').toLowerCase();
+  if (k.includes('guarda') || k.includes('watch') || k.includes('video') || k.includes('stream')) return '▶';
+  if (k.includes('gioca') || k.includes('play') || k.includes('partita')) return '🎮';
+  if (k.includes('attivit') || k.includes('activity')) return '⚡';
+  return '★';
+}
 
 function questLogPush(sev, msg) {
   questLog.push({ ts: new Date(), sev, msg });
@@ -1191,6 +1216,7 @@ function questProgressColor(pct) { return pct >= 100 ? 'var(--green)' : 'var(--a
 function renderQuestCenter(d) {
   const bridge = d.questBridge;
   updateQuestLog(bridge);
+  lastQuestBridge = bridge;
 
   if (!bridge) {
     return '<div class="card-label" style="margin:16px 0 10px;">Quest Center</div>' +
@@ -1211,97 +1237,98 @@ function renderQuestCenter(d) {
 
   let html = '<div class="card-label" style="margin:16px 0 10px;">Quest Center</div>';
 
-  html += '<div class="card"><div class="quest-overview">' +
+  html += '<div class="card quest-hero"><div class="quest-overview">' +
     '<div class="quest-stat"><div class="quest-stat-num">' + bridge.questsCompleted + '</div><div class="quest-stat-label">Completate</div></div>' +
     '<div class="quest-stat"><div class="quest-stat-num">' + bridge.questsActive + '</div><div class="quest-stat-label">In corso</div></div>' +
     '<div class="quest-stat"><div class="quest-stat-num">' + remaining + '</div><div class="quest-stat-label">Rimanenti</div></div>' +
     '<div class="quest-stat"><div class="quest-stat-num">' + bridge.questsClaimable + '</div><div class="quest-stat-label">Da riscattare</div></div>' +
     '</div>' +
-    '<div class="progress" style="margin-top:12px;"><div class="progress-fill" style="width:' + overallPct + '%;background:var(--accent);"></div></div>' +
-    '<div style="font-size:11px;color:var(--text3);margin-top:5px;text-align:center;">' + overallPct + '% completato</div>' +
-    (bridge.orbsEarned > 0 ? '<div class="quest-orbs-banner"><span class="quest-orb-dot"></span>' + bridge.orbsEarned.toLocaleString('it-IT') + ' Orbs guadagnati</div>' : '') +
+    '<div class="quest-progress-track"><div class="quest-progress-fill" style="width:' + overallPct + '%;"></div></div>' +
+    '<div class="quest-progress-pct">' + overallPct + '% completato</div>' +
+    (bridge.orbsEarned > 0 ? '<div class="quest-orbs-banner"><span class="quest-orb-icon">🪙</span>' + bridge.orbsEarned.toLocaleString('it-IT') + ' Orbs guadagnati</div>' : '') +
     '<div class="quest-age' + (stale ? ' stale' : '') + '">Aggiornato ' + formatAge(ageMs) + (stale ? ' · possibile disconnessione' : '') + '</div>' +
     '</div>';
 
-  // In progress
   const ip = bridge.inProgress || [];
-  html += '<div class="quest-section-head' + (questSectionsCollapsed.inProgress ? ' collapsed' : '') + '" data-qsec="inProgress">' +
-    '<div class="quest-section-head-title">In corso (' + ip.length + ')</div><div class="chev">▾</div></div>';
-  html += '<div class="quest-section-body' + (questSectionsCollapsed.inProgress ? ' collapsed' : '') + '" data-qbody="inProgress">';
-  if (!ip.length) {
-    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessuna quest in corso</div>';
-  } else {
-    ip.forEach(q => {
-      html += '<div class="quest-card"><div class="quest-card-top">' +
-        '<div><div class="quest-name">' + esc(q.name) + '</div><div class="quest-kind">' + esc(q.kind) + '</div></div>' +
-        (q.rewardText ? '<span class="quest-orb-tag">' + (q.isOrbs ? '<span class="quest-orb-dot"></span>' : '') + esc(q.rewardText) + '</span>' : '') +
-        '</div>' +
-        '<div class="progress"><div class="progress-fill" style="width:' + q.percent + '%;background:' + questProgressColor(q.percent) + ';"></div></div>' +
-        '<div class="quest-meta"><span>' + q.current + ' / ' + q.target + '</span><span>' + q.percent + '%</span></div>' +
-        '</div>';
-    });
-  }
-  html += '</div>';
-
-  // To complete
   const tc = bridge.toComplete || [];
-  html += '<div class="quest-section-head' + (questSectionsCollapsed.toComplete ? ' collapsed' : '') + '" data-qsec="toComplete">' +
-    '<div class="quest-section-head-title">Da completare (' + tc.length + ')</div><div class="chev">▾</div></div>';
-  html += '<div class="quest-section-body' + (questSectionsCollapsed.toComplete ? ' collapsed' : '') + '" data-qbody="toComplete">';
-  if (!tc.length) {
-    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessuna quest disponibile</div>';
-  } else {
-    tc.forEach(q => {
-      html += '<div class="quest-card" style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<div class="quest-name">' + esc(q.name) + '</div>' +
-        (q.rewardText ? '<span class="quest-orb-tag">' + (q.isOrbs ? '<span class="quest-orb-dot"></span>' : '') + esc(q.rewardText) + '</span>' : '') +
-        '</div>';
-    });
-  }
-  html += '</div>';
-
-  // Completed
   const cl = bridge.completed || [];
-  html += '<div class="quest-section-head' + (questSectionsCollapsed.completed ? ' collapsed' : '') + '" data-qsec="completed">' +
-    '<div class="quest-section-head-title">Completate (' + cl.length + ')</div><div class="chev">▾</div></div>';
-  html += '<div class="quest-section-body' + (questSectionsCollapsed.completed ? ' collapsed' : '') + '" data-qbody="completed">';
-  if (!cl.length) {
-    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessuna quest completata</div>';
-  } else {
-    html += '<div class="card">' + cl.map(q =>
-      '<div class="quest-completed-row"><div class="quest-completed-name"><span class="quest-check">✓</span><span>' + esc(q.name) + '</span></div>' +
-      (q.rewardText ? '<span class="quest-orb-tag">' + (q.isOrbs ? '<span class="quest-orb-dot"></span>' : '') + esc(q.rewardText) + '</span>' : '') +
-      '</div>'
-    ).join('') + '</div>';
-  }
-  html += '</div>';
 
-  // Activity log
-  html += '<div class="quest-section-head' + (questSectionsCollapsed.log ? ' collapsed' : '') + '" data-qsec="log">' +
-    '<div class="quest-section-head-title">Attività</div><div class="chev">▾</div></div>';
-  html += '<div class="quest-section-body' + (questSectionsCollapsed.log ? ' collapsed' : '') + '" data-qbody="log">';
-  if (!questLog.length) {
-    html += '<div style="font-size:12px;color:var(--text4);padding:6px 2px 10px;">Nessun evento registrato</div>';
-  } else {
-    const sevMark = { info: 'i', success: '✓', warning: '!', error: '×' };
-    html += '<div class="card quest-log">' + questLog.slice().reverse().map(l =>
-      '<div class="quest-log-line"><span class="quest-log-ts">' + l.ts.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>' +
-      '<span class="quest-log-sev ' + l.sev + '">' + sevMark[l.sev] + '</span><span>' + esc(l.msg) + '</span></div>'
-    ).join('') + '</div>';
-  }
-  html += '</div>';
+  html += '<div class="quest-tabs">' +
+    questTabBtn('inProgress', 'In corso', ip.length) +
+    questTabBtn('toComplete', 'Da fare', tc.length) +
+    questTabBtn('completed', 'Completate', cl.length) +
+    questTabBtn('log', 'Attività', questLog.length) +
+    '</div>';
+
+  html += '<div id="questTabContent">' + renderQuestTabContent(questActiveTab, bridge) + '</div>';
 
   return html;
 }
 
+function questTabBtn(key, label, count) {
+  return '<div class="quest-tab' + (questActiveTab === key ? ' active' : '') + '" data-qtab="' + key + '">' +
+    label + '<span class="qt-count">' + count + '</span></div>';
+}
+
+function questEmpty(icon, msg) {
+  return '<div class="quest-empty"><div class="quest-empty-icon">' + icon + '</div><div class="quest-empty-msg">' + msg + '</div></div>';
+}
+
+function renderQuestTabContent(tab, bridge) {
+  if (tab === 'inProgress') {
+    const ip = bridge.inProgress || [];
+    if (!ip.length) return questEmpty('⚡', 'Nessuna quest in corso');
+    return '<div class="quest-list">' + ip.map(q =>
+      '<div class="quest-card"><div class="quest-icon">' + questIconFor(q.kind) + '</div>' +
+      '<div class="quest-card-main"><div class="quest-card-top">' +
+      '<div><div class="quest-name">' + esc(q.name) + '</div><div class="quest-kind">' + esc(q.kind) + '</div></div>' +
+      (q.rewardText ? '<span class="quest-orb-tag">' + esc(q.rewardText) + '</span>' : '') +
+      '</div>' +
+      '<div class="quest-mini-track"><div class="quest-mini-fill" style="width:' + q.percent + '%;background:' + questProgressColor(q.percent) + ';"></div></div>' +
+      '<div class="quest-meta"><span>' + q.current + ' / ' + q.target + '</span><span>' + q.percent + '%</span></div>' +
+      '</div></div>'
+    ).join('') + '</div>';
+  }
+
+  if (tab === 'toComplete') {
+    const tc = bridge.toComplete || [];
+    if (!tc.length) return questEmpty('✓', 'Nessuna quest disponibile');
+    return '<div class="quest-list">' + tc.map(q =>
+      '<div class="quest-card"><div class="quest-icon">' + questIconFor(q.kind) + '</div>' +
+      '<div class="quest-card-main" style="display:flex;justify-content:space-between;align-items:center;">' +
+      '<div class="quest-name">' + esc(q.name) + '</div>' +
+      (q.rewardText ? '<span class="quest-orb-tag">' + esc(q.rewardText) + '</span>' : '') +
+      '</div></div>'
+    ).join('') + '</div>';
+  }
+
+  if (tab === 'completed') {
+    const cl = bridge.completed || [];
+    if (!cl.length) return questEmpty('🏁', 'Nessuna quest completata');
+    return '<div class="card">' + cl.map(q =>
+      '<div class="quest-completed-row"><div class="quest-completed-name"><span class="quest-check">✓</span><span>' + esc(q.name) + '</span></div>' +
+      (q.rewardText ? '<span class="quest-orb-tag">' + esc(q.rewardText) + '</span>' : '') +
+      '</div>'
+    ).join('') + '</div>';
+  }
+
+  // log
+  if (!questLog.length) return questEmpty('📋', 'Nessun evento registrato');
+  const sevMark = { info: 'i', success: '✓', warning: '!', error: '×' };
+  return '<div class="card quest-log">' + questLog.slice().reverse().map(l =>
+    '<div class="quest-log-line"><span class="quest-log-ts">' + l.ts.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + '</span>' +
+    '<span class="quest-log-sev ' + l.sev + '">' + sevMark[l.sev] + '</span><span>' + esc(l.msg) + '</span></div>'
+  ).join('') + '</div>';
+}
+
 function bindQuestSectionToggles(el) {
-  el.querySelectorAll('[data-qsec]').forEach(head => {
-    head.onclick = () => {
-      const key = head.getAttribute('data-qsec');
-      questSectionsCollapsed[key] = !questSectionsCollapsed[key];
-      head.classList.toggle('collapsed', questSectionsCollapsed[key]);
-      const body = el.querySelector('[data-qbody="' + key + '"]');
-      if (body) body.classList.toggle('collapsed', questSectionsCollapsed[key]);
+  el.querySelectorAll('[data-qtab]').forEach(tabEl => {
+    tabEl.onclick = () => {
+      haptic();
+      questActiveTab = tabEl.getAttribute('data-qtab');
+      el.querySelectorAll('[data-qtab]').forEach(t => t.classList.toggle('active', t === tabEl));
+      const content = el.querySelector('#questTabContent');
+      if (content && lastQuestBridge) content.innerHTML = renderQuestTabContent(questActiveTab, lastQuestBridge);
     };
   });
 }
