@@ -3,260 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0f0f0f">
 <title>VAMPJRO Control Owner</title>
 <style>
   :root {
-    --bg: #000;
-    --surface: #1c1c1e;
-    --surface2: #2c2c2e;
-    --surface3: #3a3a3c;
-    --text: #fff;
-    --text2: #8e8e93;
+    --bg: #0f0f0f;
+    --sidebar: #131313;
+    --surface: #1a1a1c;
+    --surface2: #232326;
+    --surface3: #2c2c2f;
+    --border: rgba(255,255,255,.07);
+    --text: #f4f4f5;
+    --text2: #9a9aa0;
+    --text3: #6b6b70;
     --accent: #6366f1;
-    --accent-dim: rgba(99,102,241,.3);
+    --accent-dim: rgba(99,102,241,.16);
     --green: #30d158;
+    --green-dim: rgba(48,209,88,.14);
     --red: #ff453a;
+    --red-dim: rgba(255,69,58,.14);
     --orange: #ff9f0a;
+    --orange-dim: rgba(255,159,10,.14);
     --safe-b: env(safe-area-inset-bottom, 0px);
+    --radius: 12px;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
     font-family: -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',system-ui,sans-serif;
     background: var(--bg); color: var(--text);
     min-height: 100dvh;
-    user-select: none;
   }
+  button, input, textarea { font-family: inherit; }
+  ::selection { background: var(--accent-dim); }
 
-  .header {
-    padding: 16px;
-    border-bottom: 1px solid #222;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .header h1 { font-size: 20px; font-weight: 700; }
-  .header .badge {
-    font-size: 11px; padding: 3px 8px; border-radius: 8px;
-    background: var(--accent-dim); color: var(--accent); font-weight: 600;
-  }
-
-  .status-bar {
-    padding: 8px 16px;
-    font-size: 12px; color: var(--text2);
-    display: flex; align-items: center; gap: 6px;
-    border-bottom: 1px solid #1a1a1a;
-  }
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--red); flex-shrink: 0;
-  }
-  .status-dot.connected { background: var(--green); }
-
-  /* Auth screen */
+  /* ---------- Auth screen ---------- */
   #auth-screen {
     display: flex; flex-direction: column; align-items: center;
-    justify-content: center; min-height: 80vh; padding: 24px; gap: 16px;
+    justify-content: center; min-height: 100dvh; padding: 24px; gap: 16px;
   }
-  #auth-screen h2 { font-size: 24px; font-weight: 700; }
-  #auth-screen p { color: var(--text2); font-size: 14px; text-align: center; max-width: 300px; }
+  .auth-brand { font-size: 22px; font-weight: 700; letter-spacing: -.2px; margin-bottom: 4px; }
+  .auth-badge {
+    font-size: 11px; padding: 3px 9px; border-radius: 99px;
+    background: var(--accent-dim); color: var(--accent2, var(--accent)); font-weight: 600;
+    margin-bottom: 18px;
+  }
+  #auth-screen h2 { font-size: 20px; font-weight: 700; }
+  #auth-screen p { color: var(--text2); font-size: 13.5px; text-align: center; max-width: 300px; }
   #auth-screen input {
-    width: 100%; max-width: 300px; padding: 14px 16px;
-    background: var(--surface); border: 1px solid #333; border-radius: 12px;
-    color: var(--text); font-size: 16px; outline: none;
+    width: 100%; max-width: 300px; padding: 13px 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-size: 15px; outline: none;
   }
   #auth-screen input:focus { border-color: var(--accent); }
   #auth-screen button {
-    width: 100%; max-width: 300px; padding: 14px;
-    background: var(--accent); border: none; border-radius: 12px;
-    color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+    width: 100%; max-width: 300px; padding: 13px;
+    background: var(--accent); border: none; border-radius: 10px;
+    color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
   }
-  #auth-screen button:active { opacity: 0.8; }
-  .auth-error { color: var(--red); font-size: 13px; }
+  #auth-screen button:active { opacity: 0.85; }
+  .auth-error { color: var(--red); font-size: 13px; min-height: 16px; }
 
-  /* Dashboard */
-  #dashboard { display: none; }
-  .section { padding: 16px; }
-  .section-title {
-    font-size: 13px; color: var(--text2); text-transform: uppercase;
-    letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600;
-  }
+  /* ---------- App shell ---------- */
+  #app-shell { display: none; }
+  #app-shell.show { display: flex; min-height: 100dvh; }
 
-  .stats-row {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    margin-bottom: 16px;
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 16px 12px; gap: 4px;
   }
-  .stat-card {
-    background: var(--surface); border-radius: 12px; padding: 12px;
-    text-align: center;
+  .sidebar-brand {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px 18px;
   }
-  .stat-value { font-size: 24px; font-weight: 700; }
-  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .sidebar-brand-name { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
+  .sidebar-brand-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+    background: var(--accent-dim); color: #a5a6f6;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 13.5px; font-weight: 500; color: var(--text2);
+    transition: background .12s, color .12s;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active { background: var(--accent-dim); color: var(--text); }
+  .nav-item .nav-icon { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .nav-item svg { width: 17px; height: 17px; }
+  .sidebar-spacer { flex: 1; }
+  .sidebar-status {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px; margin-top: 6px; border-radius: 8px;
+    background: var(--surface); font-size: 12px; color: var(--text2);
+  }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+  .status-dot.connected { background: var(--green); }
 
-  .client-list { display: flex; flex-direction: column; gap: 8px; }
-  .client-card {
-    background: var(--surface); border-radius: 12px; padding: 14px;
-    display: flex; align-items: center; gap: 12px; cursor: pointer;
+  .main-content { flex: 1; min-width: 0; overflow-y: auto; height: 100dvh; }
+  .view { display: none; padding: 28px 32px; max-width: 1100px; }
+  .view.active { display: block; }
+  .view-header { margin-bottom: 22px; }
+  .view-title { font-size: 21px; font-weight: 700; letter-spacing: -.2px; }
+  .view-subtitle { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
+  .panel-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 14px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .stat-value { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .stat-label { font-size: 11.5px; color: var(--text2); margin-top: 5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .client-list { display: flex; flex-direction: column; gap: 6px; }
+  .client-row {
+    display: flex; align-items: center; gap: 12px; padding: 11px 10px; border-radius: 9px;
+    cursor: pointer; transition: background .12s;
   }
-  .client-card:active { background: var(--surface2); }
-  .client-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .client-row:hover { background: var(--surface2); }
+  .client-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--text3); }
   .client-dot.online { background: var(--green); }
-  .client-dot.offline { background: var(--text2); }
+  .client-dot.offline { background: var(--text3); }
   .client-dot.error { background: var(--red); }
   .client-dot.updating { background: var(--orange); }
   .client-info { flex: 1; min-width: 0; }
-  .client-name {
-    font-size: 15px; font-weight: 600;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .client-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .client-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .client-meta { font-size: 11.5px; color: var(--text2); margin-top: 2px; }
   .client-actions { display: flex; gap: 6px; }
-  .client-actions button {
-    padding: 6px 10px; border-radius: 8px; border: none;
+  .btn-sm {
+    padding: 6px 11px; border-radius: 7px; border: none;
     font-size: 12px; font-weight: 600; cursor: pointer;
   }
-  .btn-info { background: var(--accent-dim); color: var(--accent); }
-  .btn-danger { background: rgba(255,69,58,.15); color: var(--red); }
+  .btn-info { background: var(--accent-dim); color: #a5a6f6; }
+  .btn-danger { background: var(--red-dim); color: var(--red); }
 
-  .pair-section {
-    background: var(--surface); border-radius: 12px; padding: 16px;
-    margin-top: 12px;
-  }
-  .pair-section h3 { font-size: 15px; margin-bottom: 12px; }
   .pair-row { display: flex; gap: 8px; }
   .pair-row input {
     flex: 1; padding: 10px 12px;
-    background: var(--surface2); border: 1px solid #333; border-radius: 8px;
-    color: var(--text); font-size: 14px; outline: none;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 13.5px; outline: none;
   }
+  .pair-row input:focus { border-color: var(--accent); }
   .pair-row button {
     padding: 10px 16px; background: var(--accent); border: none;
-    border-radius: 8px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;
   }
-
   .pairing-result {
     margin-top: 12px; padding: 12px;
-    background: rgba(48,209,88,.1); border-radius: 8px;
+    background: var(--green-dim); border-radius: 8px;
     font-size: 13px; display: none;
   }
   .pairing-result code {
     display: block; margin-top: 6px; padding: 8px;
     background: var(--surface2); border-radius: 6px;
-    font-family: 'SF Mono', monospace; font-size: 12px;
+    font-family: 'SF Mono', Menlo, monospace; font-size: 11.5px;
     word-break: break-all; user-select: all;
   }
 
-  /* Detail overlay */
+  /* Detail overlay (client + audit) */
   .overlay {
-    position: fixed; inset: 0; background: var(--bg);
-    z-index: 100; display: none; overflow-y: auto;
-    padding: 16px; padding-bottom: calc(16px + var(--safe-b));
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    z-index: 100; display: none; align-items: center; justify-content: center;
   }
-  .overlay.show { display: block; }
-  .overlay-header {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  .overlay.show { display: flex; }
+  .overlay-panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    width: 440px; max-width: calc(100vw - 32px); max-height: calc(100vh - 64px); overflow-y: auto;
+    padding: 20px;
   }
-  .overlay-back {
-    background: none; border: none; color: var(--accent);
-    font-size: 16px; cursor: pointer; padding: 4px;
-  }
-  .overlay-title { font-size: 20px; font-weight: 700; }
+  .overlay-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .overlay-title { font-size: 17px; font-weight: 700; }
+  .overlay-close { background: var(--surface2); border: none; color: var(--text2); width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 14px; }
 
-  .detail-row {
-    display: flex; justify-content: space-between; padding: 12px 0;
-    border-bottom: 1px solid #1a1a1a; font-size: 14px;
-  }
+  .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .detail-row:last-child { border-bottom: none; }
   .detail-label { color: var(--text2); }
 
   .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
   .action-buttons button {
-    width: 100%; padding: 14px; border-radius: 12px; border: none;
-    font-size: 15px; font-weight: 600; cursor: pointer;
+    width: 100%; padding: 12px; border-radius: 10px; border: none;
+    font-size: 14px; font-weight: 600; cursor: pointer;
   }
   .btn-primary { background: var(--accent); color: #fff; }
-  .btn-destructive { background: rgba(255,69,58,.15); color: var(--red); }
+  .btn-destructive { background: var(--red-dim); color: var(--red); }
 
   /* Audit log */
-  .audit-entry {
-    padding: 10px 0; border-bottom: 1px solid #1a1a1a;
-    font-size: 13px;
-  }
+  .audit-entry { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .audit-entry:last-child { border-bottom: none; }
   .audit-action { font-weight: 600; }
-  .audit-time { color: var(--text2); font-size: 11px; }
+  .audit-time { color: var(--text2); font-size: 11px; margin-top: 2px; }
 
-  .empty-state {
-    text-align: center; padding: 40px 16px;
-    color: var(--text2); font-size: 14px;
-  }
+  .empty-state { text-align: center; padding: 36px 16px; color: var(--text2); font-size: 13.5px; }
 
   .toast {
-    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--surface2); color: var(--text);
-    padding: 10px 20px; border-radius: 20px; font-size: 14px;
-    opacity: 0; transition: opacity .3s, transform .3s; z-index: 200; pointer-events: none;
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface3); color: var(--text); border: 1px solid var(--border);
+    padding: 10px 20px; border-radius: 20px; font-size: 13.5px;
+    opacity: 0; transition: opacity .25s, transform .25s; z-index: 200; pointer-events: none;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* Release Manager */
-  .field-label { font-size: 12px; color: var(--text2); margin: 10px 0 4px; }
+  .field-label { font-size: 12px; color: var(--text2); margin: 12px 0 5px; }
   .field-label:first-child { margin-top: 0; }
   .form-input {
     width: 100%; padding: 10px 12px;
-    background: var(--surface2); border: 1px solid #333; border-radius: 8px;
-    color: var(--text); font-size: 14px; outline: none; font-family: inherit;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 13.5px; outline: none; font-family: inherit;
   }
   .form-input:focus { border-color: var(--accent); }
   textarea.form-input { resize: vertical; min-height: 60px; }
   .form-row { display: flex; gap: 8px; }
   .form-row .form-input { flex: 1; }
   .btn-block {
-    width: 100%; padding: 12px; margin-top: 12px;
-    background: var(--accent); border: none; border-radius: 10px;
-    color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    padding: 11px 18px; margin-top: 14px;
+    background: var(--accent); border: none; border-radius: 9px;
+    color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer;
   }
-  .btn-block.secondary { background: var(--surface2); color: var(--text); }
+  .btn-block.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
   .btn-block:disabled { opacity: 0.5; cursor: default; }
-  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--text2); }
-  .conn-status { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; display: none; }
-  .conn-status.ok { display: block; background: rgba(48,209,88,.1); color: var(--green); }
-  .conn-status.err { display: block; background: rgba(255,69,58,.1); color: var(--red); }
-  .progress-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-  .progress-item {
-    display: flex; align-items: center; gap: 8px; font-size: 13px;
-    padding: 8px 10px; border-radius: 8px; background: var(--surface2);
-  }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--text2); }
+  .conn-status { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 13px; display: none; }
+  .conn-status.ok { display: block; background: var(--green-dim); color: var(--green); }
+  .conn-status.err { display: block; background: var(--red-dim); color: var(--red); }
+  .progress-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .progress-item { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 9px 11px; border-radius: 8px; background: var(--surface2); }
   .progress-icon { flex-shrink: 0; width: 16px; text-align: center; }
   .progress-item.ok .progress-icon { color: var(--green); }
   .progress-item.err .progress-icon { color: var(--red); }
-  .progress-item.pending .progress-icon { color: var(--text2); }
-  .history-item {
-    padding: 12px; border-radius: 10px; background: var(--surface); margin-bottom: 8px;
-  }
+  .history-item { padding: 13px 14px; border-radius: 10px; background: var(--surface2); margin-bottom: 8px; }
   .history-head { display: flex; justify-content: space-between; align-items: center; }
-  .history-version { font-weight: 700; font-size: 14px; }
-  .history-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
-  .history-status.success { background: rgba(48,209,88,.15); color: var(--green); }
-  .history-status.partial { background: rgba(255,159,10,.15); color: var(--orange); }
-  .history-status.failed { background: rgba(255,69,58,.15); color: var(--red); }
-  .history-date { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .subsection-title { font-size: 14px; font-weight: 600; margin: 16px 0 8px; }
-  .subsection-title:first-child { margin-top: 0; }
+  .history-version { font-weight: 700; font-size: 13.5px; }
+  .history-status { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: .3px; }
+  .history-status.success { background: var(--green-dim); color: var(--green); }
+  .history-status.partial { background: var(--orange-dim); color: var(--orange); }
+  .history-status.failed { background: var(--red-dim); color: var(--red); }
+  .history-date { font-size: 11.5px; color: var(--text2); margin-top: 3px; }
+  .subsection-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; margin: 6px 0 12px; }
+
+  .info-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .info-row:last-child { border-bottom: none; }
+  .not-available-banner {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px;
+    background: var(--surface2); color: var(--text2); font-size: 13px; margin-bottom: 16px;
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>VAMPJRO Owner</h1>
-  <span class="badge">ADMIN</span>
-</div>
-
-<div class="status-bar">
-  <div class="status-dot" id="backendDot"></div>
-  <span id="backendStatus">Backend: disconnesso</span>
-</div>
-
 <div id="auth-screen">
+  <div class="auth-brand">VAMPJRO</div>
+  <div class="auth-badge">OWNER</div>
   <h2>Autenticazione</h2>
   <p>Inserisci il token Owner per accedere al pannello di controllo</p>
   <input type="password" id="tokenInput" placeholder="Token Owner">
@@ -264,91 +265,162 @@
   <div class="auth-error" id="authError"></div>
 </div>
 
-<div id="dashboard">
-  <div class="section">
-    <div class="section-title">Panoramica</div>
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="totalClients">0</div>
-        <div class="stat-label">Client Totali</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="onlineClients" style="color:var(--green)">0</div>
-        <div class="stat-label">Online</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="offlineClients" style="color:var(--text2)">0</div>
-        <div class="stat-label">Offline</div>
-      </div>
+<div id="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-name">VAMPJRO</span>
+      <span class="sidebar-brand-badge">OWNER</span>
+    </div>
+    <div class="nav-item active" data-view="dashboard">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></span>
+      Dashboard
+    </div>
+    <div class="nav-item" data-view="devices">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v10H4V6zm0 12h16v2H4v-2z"/></svg></span>
+      Dispositivi
+    </div>
+    <div class="nav-item" data-view="audit">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></span>
+      Audit Log
+    </div>
+    <div class="nav-item" data-view="release">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+      Release Manager
+    </div>
+    <div class="nav-item" data-view="info">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></span>
+      Informazioni
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-status">
+      <div class="status-dot" id="backendDot"></div>
+      <span id="backendStatus">Backend: disconnesso</span>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">Client Registrati</div>
-    <div class="client-list" id="clientList">
-      <div class="empty-state">Nessun client registrato</div>
-    </div>
-
-    <div class="pair-section">
-      <h3>Nuovo Pairing</h3>
-      <div class="pair-row">
-        <input type="text" id="pairName" placeholder="Nome client">
-        <button onclick="createPairing()">Crea</button>
+  <div class="main-content">
+    <div class="view active" id="view-dashboard">
+      <div class="view-header">
+        <div class="view-title">Dashboard</div>
+        <div class="view-subtitle">Panoramica dispositivi e stato del sistema</div>
       </div>
-      <div class="pairing-result" id="pairingResult">
-        <strong>Credenziali di pairing:</strong>
-        <code id="pairingCode"></code>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-value" id="totalClients">0</div><div class="stat-label">Dispositivi totali</div></div>
+        <div class="stat-card"><div class="stat-value" id="onlineClients" style="color:var(--green)">0</div><div class="stat-label">Online</div></div>
+        <div class="stat-card"><div class="stat-value" id="offlineClients" style="color:var(--text2)">0</div><div class="stat-label">Offline</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">Dispositivi recenti</div>
+          <div class="client-list" id="clientListPreview"><div class="empty-state">Nessun dispositivo registrato</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Attività recente</div>
+          <div id="auditLogPreview"><div class="empty-state">Nessun evento registrato</div></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="section">
-    <div class="section-title">Log di Audit</div>
-    <div id="auditLog">
-      <div class="empty-state">Nessun evento registrato</div>
+    <div class="view" id="view-devices">
+      <div class="view-header">
+        <div class="view-title">Dispositivi</div>
+        <div class="view-subtitle">Client collegati e pairing</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Dispositivi registrati</div>
+        <div class="client-list" id="clientList"><div class="empty-state">Nessun client registrato</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Nuovo pairing</div>
+        <div class="pair-row">
+          <input type="text" id="pairName" placeholder="Nome client">
+          <button onclick="createPairing()">Crea</button>
+        </div>
+        <div class="pairing-result" id="pairingResult">
+          <strong>Credenziali di pairing:</strong>
+          <code id="pairingCode"></code>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="section" id="releaseSection" style="display:none">
-    <div class="section-title">Release Manager</div>
-
-    <div class="subsection-title">Configurazione GitHub</div>
-    <div class="field-label">Owner GitHub</div>
-    <input class="form-input" id="relOwner" placeholder="es. vampjro">
-    <div class="field-label">Repository</div>
-    <input class="form-input" id="relRepo" placeholder="es. Vampjro-Control-Center">
-    <div class="field-label">Gist ID (manifest update)</div>
-    <input class="form-input" id="relGist" placeholder="Gist ID">
-    <div class="field-label">GitHub Token <span id="relTokenStatus" style="color:var(--text2)"></span></div>
-    <input class="form-input" type="password" id="relToken" placeholder="Lascia vuoto per non modificarlo">
-    <div class="form-row">
-      <button class="btn-block secondary" onclick="saveReleaseConfig()">Salva</button>
-      <button class="btn-block secondary" onclick="testReleaseConnection()">Test Connessione</button>
+    <div class="view" id="view-audit">
+      <div class="view-header">
+        <div class="view-title">Audit Log</div>
+        <div class="view-subtitle">Cronologia eventi di sicurezza e pairing</div>
+      </div>
+      <div class="panel">
+        <div id="auditLog"><div class="empty-state">Nessun evento registrato</div></div>
+      </div>
     </div>
-    <div class="conn-status" id="relConnStatus"></div>
 
-    <div class="subsection-title">Pubblica Release</div>
-    <div class="field-label">Versione</div>
-    <input class="form-input" id="relVersion" placeholder="es. 1.1.0">
-    <div class="field-label">Note di rilascio</div>
-    <textarea class="form-input" id="relNotes" placeholder="Cosa è cambiato in questa versione..."></textarea>
-    <div class="checkbox-row">
-      <input type="checkbox" id="relDryRun"> <label for="relDryRun">Dry run (valida e compila senza pubblicare)</label>
+    <div class="view" id="view-release">
+      <div class="view-header">
+        <div class="view-title">Release Manager</div>
+        <div class="view-subtitle">Build, pubblicazione e storico release</div>
+      </div>
+      <div id="releaseUnavailable" class="not-available-banner" style="display:none">
+        Release Manager richiede l'esecuzione da un checkout completo del repository (non disponibile in questa installazione).
+      </div>
+      <div id="releaseSection" style="display:none">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="subsection-title">Pubblica release</div>
+            <div class="field-label">Versione</div>
+            <input class="form-input" id="relVersion" placeholder="es. 1.1.0">
+            <div class="field-label">Note di rilascio</div>
+            <textarea class="form-input" id="relNotes" placeholder="Cosa è cambiato in questa versione..."></textarea>
+            <div class="checkbox-row">
+              <input type="checkbox" id="relDryRun"> <label for="relDryRun">Dry run (valida e compila senza pubblicare)</label>
+            </div>
+            <button class="btn-block" id="relPublishBtn" onclick="publishRelease()">Pubblica Release</button>
+            <div class="progress-list" id="relProgress"></div>
+          </div>
+          <div class="panel">
+            <div class="subsection-title">Configurazione GitHub</div>
+            <div class="field-label">Owner GitHub</div>
+            <input class="form-input" id="relOwner" placeholder="es. vampjro">
+            <div class="field-label">Repository</div>
+            <input class="form-input" id="relRepo" placeholder="es. Vampjro-Control-Center">
+            <div class="field-label">Gist ID (manifest update)</div>
+            <input class="form-input" id="relGist" placeholder="Gist ID">
+            <div class="field-label">GitHub Token <span id="relTokenStatus" style="color:var(--text2)"></span></div>
+            <input class="form-input" type="password" id="relToken" placeholder="Lascia vuoto per non modificarlo">
+            <div class="form-row">
+              <button class="btn-block secondary" onclick="saveReleaseConfig()">Salva</button>
+              <button class="btn-block secondary" onclick="testReleaseConnection()">Test Connessione</button>
+            </div>
+            <div class="conn-status" id="relConnStatus"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="subsection-title">Storico release</div>
+          <div id="relHistory"><div class="empty-state">Nessuna release pubblicata</div></div>
+        </div>
+      </div>
     </div>
-    <button class="btn-block" id="relPublishBtn" onclick="publishRelease()">Pubblica Release</button>
-    <div class="progress-list" id="relProgress"></div>
 
-    <div class="subsection-title">Storico Release</div>
-    <div id="relHistory"><div class="empty-state">Nessuna release pubblicata</div></div>
+    <div class="view" id="view-info">
+      <div class="view-header">
+        <div class="view-title">Informazioni</div>
+        <div class="view-subtitle">Versione e supporto</div>
+      </div>
+      <div class="panel">
+        <div class="info-row"><span class="detail-label">Prodotto</span><span>VAMPJRO Control Owner</span></div>
+        <div class="info-row"><span class="detail-label">Versione</span><span id="ownerVersionInfo">--</span></div>
+        <div class="info-row"><span class="detail-label">Supporto</span><a href="https://t.me/vampjro" target="_blank" style="color:var(--accent)">t.me/vampjro</a></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="overlay" id="clientDetail">
-  <div class="overlay-header">
-    <button class="overlay-back" onclick="closeDetail()">&larr;</button>
-    <span class="overlay-title" id="detailName">Client</span>
+  <div class="overlay-panel">
+    <div class="overlay-header">
+      <span class="overlay-title" id="detailName">Client</span>
+      <button class="overlay-close" onclick="closeDetail()">&times;</button>
+    </div>
+    <div id="detailContent"></div>
   </div>
-  <div id="detailContent"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -475,16 +547,28 @@
 
   function showDashboard() {
     document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('app-shell').classList.add('show');
     initReleaseSection();
+    fetch('/api/health').then(r => r.json()).then(h => {
+      const el = document.getElementById('ownerVersionInfo');
+      if (el) el.textContent = 'v' + (h.version || '?');
+    }).catch(() => {});
   }
+
+  // ---------- Sidebar navigation ----------
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.onclick = () => {
+      const view = item.getAttribute('data-view');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n === item));
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+    };
+  });
 
   function refreshClients() {
     send({ type: 'clientList' });
   }
 
   function renderClients() {
-    const list = document.getElementById('clientList');
     const total = clients.length;
     const online = clients.filter(c => c.online && !c.revoked).length;
     const offline = total - online;
@@ -493,25 +577,30 @@
     document.getElementById('onlineClients').textContent = online;
     document.getElementById('offlineClients').textContent = offline;
 
-    if (total === 0) {
-      list.innerHTML = '<div class="empty-state">Nessun client registrato</div>';
-      return;
-    }
-
-    list.innerHTML = clients.map(c => {
+    const rowHtml = (c) => {
       const stateClass = c.revoked ? 'offline' : (c.online ? 'online' : c.state || 'offline');
       const lastSeen = c.last_seen ? new Date(c.last_seen).toLocaleString('it-IT') : 'mai';
-      return `<div class="client-card" onclick="showClientDetail('${c.id}')">
+      return `<div class="client-row" onclick="showClientDetail('${c.id}')">
         <div class="client-dot ${stateClass}"></div>
         <div class="client-info">
           <div class="client-name">${esc(c.name)}${c.revoked ? ' (revocato)' : ''}</div>
           <div class="client-meta">v${c.version || '?'} &middot; ${lastSeen}</div>
         </div>
         <div class="client-actions">
-          <button class="btn-info" onclick="event.stopPropagation();requestHealth('${c.id}')">Health</button>
+          <button class="btn-sm btn-info" onclick="event.stopPropagation();requestHealth('${c.id}')">Health</button>
         </div>
       </div>`;
-    }).join('');
+    };
+
+    const list = document.getElementById('clientList');
+    const preview = document.getElementById('clientListPreview');
+    if (total === 0) {
+      list.innerHTML = '<div class="empty-state">Nessun client registrato</div>';
+      preview.innerHTML = '<div class="empty-state">Nessun dispositivo registrato</div>';
+      return;
+    }
+    list.innerHTML = clients.map(rowHtml).join('');
+    preview.innerHTML = clients.slice(0, 5).map(rowHtml).join('');
   }
 
   window.showClientDetail = function(clientId) {
@@ -607,11 +696,6 @@
   }
 
   function renderAuditLog(entries, total) {
-    const el = document.getElementById('auditLog');
-    if (!entries.length) {
-      el.innerHTML = '<div class="empty-state">Nessun evento registrato</div>';
-      return;
-    }
     const actionLabels = {
       client_paired: 'Client Paired',
       client_unpaired: 'Client Unpaired',
@@ -621,7 +705,7 @@
       owner_login: 'Owner Login',
       settings_changed: 'Settings Changed'
     };
-    el.innerHTML = entries.map(e => {
+    const rowHtml = (e) => {
       const time = new Date(e.created_at).toLocaleString('it-IT');
       const label = actionLabels[e.action] || e.action;
       let detail = '';
@@ -634,7 +718,17 @@
         if (d.ip) detail += ' &middot; ' + esc(d.ip);
       }
       return `<div class="audit-entry"><span class="audit-action">${esc(label)}</span>${detail}<div class="audit-time">${time}</div></div>`;
-    }).join('') + (total > entries.length ? `<div style="text-align:center;padding:12px;color:var(--text2);font-size:12px">${total} eventi totali</div>` : '');
+    };
+
+    const full = document.getElementById('auditLog');
+    const preview = document.getElementById('auditLogPreview');
+    if (!entries.length) {
+      full.innerHTML = '<div class="empty-state">Nessun evento registrato</div>';
+      preview.innerHTML = '<div class="empty-state">Nessun evento registrato</div>';
+      return;
+    }
+    full.innerHTML = entries.map(rowHtml).join('') + (total > entries.length ? `<div style="text-align:center;padding:12px;color:var(--text2);font-size:12px">${total} eventi totali</div>` : '');
+    preview.innerHTML = entries.slice(0, 5).map(rowHtml).join('');
   }
 
   // ---------- Release Manager ----------
@@ -661,12 +755,15 @@
     if (relInitialized) return;
     try {
       const avail = await fetch('/api/release/available').then(r => r.json());
-      if (!avail.available) return; // not running from a dev checkout: leave hidden
+      if (!avail.available) {
+        document.getElementById('releaseUnavailable').style.display = 'flex';
+        return;
+      }
       relInitialized = true;
       document.getElementById('releaseSection').style.display = 'block';
       await loadReleaseConfig();
       await refreshReleaseHistory();
-    } catch (_) { /* leave hidden on any error */ }
+    } catch (_) { document.getElementById('releaseUnavailable').style.display = 'flex'; }
   }
 
   async function loadReleaseConfig() {
