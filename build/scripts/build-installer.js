@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 
 // __dirname is build/scripts, so the repo root is two levels up.
 const ROOT = path.join(__dirname, '..', '..');
@@ -171,12 +171,55 @@ function buildProduct(name, srcDir, destDir, extraExcludes, rootMetadataFiles) {
   }
 }
 
+// Builds the native window host (WebView2 + a spawned Node child process)
+// that shows the existing web UI in a real desktop window instead of a
+// browser tab. Self-contained + single-file so it needs nothing installed
+// on the target machine beyond the Edge WebView2 runtime already present
+// on Windows 10/11 — same "bundle everything" approach as the Node
+// runtime. Best-effort: if the .NET SDK isn't present, the installers
+// still build and fall back to the old plain-console launch.
+function publishWebviewHost() {
+  const hostDir = path.join(ROOT, 'build', 'webview-host');
+  const csproj = path.join(hostDir, 'webview-host.csproj');
+  if (!fs.existsSync(csproj)) return null;
+
+  let dotnet = 'dotnet';
+  try {
+    execFileSync(dotnet, ['--version'], { stdio: 'pipe' });
+  } catch {
+    const fallback = path.join(process.env.ProgramFiles || 'C:\\Program Files', 'dotnet', 'dotnet.exe');
+    if (fs.existsSync(fallback)) dotnet = fallback;
+    else { console.log('  .NET SDK not found — skipping native window host (falls back to console launch).'); return null; }
+  }
+
+  const outDir = path.join(hostDir, 'publish');
+  console.log('\nPublishing native window host (dotnet publish)...');
+  try {
+    execFileSync(dotnet, [
+      'publish', csproj,
+      '-c', 'Release',
+      '-r', 'win-x64',
+      '--self-contained', 'true',
+      '-p:PublishSingleFile=true',
+      '-p:IncludeNativeLibrariesForSelfExtract=true',
+      '-o', outDir
+    ], { stdio: 'inherit' });
+  } catch (err) {
+    console.log(`  Native window host publish failed: ${err.message} — falls back to console launch.`);
+    return null;
+  }
+  const exePath = path.join(outDir, 'webview-host.exe');
+  return fs.existsSync(exePath) ? exePath : null;
+}
+
 // --- Main ---
 console.log('VAMPJRO Release Builder');
 console.log('=======================');
 console.log(`Version: ${VERSION}\n`);
 
 require(path.join(ROOT, 'tools', 'sync-version.js')).sync();
+
+const webviewHostExe = publishWebviewHost();
 
 if (!fs.existsSync(DIST_DIR)) fs.mkdirSync(DIST_DIR, { recursive: true });
 if (!fs.existsSync(RELEASE_DIR)) fs.mkdirSync(RELEASE_DIR, { recursive: true });
@@ -203,8 +246,20 @@ fs.copyFileSync(
 
 // Create launcher bat — runtime data lives under %LOCALAPPDATA%\VAMPJRO\Data,
 // never inside the app install folder, so updates/reinstalls never touch it.
+// If the native window host was published, it owns launching Node itself
+// (see StartNodeProcess in build/webview-host/Program.cs) and shows the UI
+// in a real window; otherwise this falls back to the old direct-console
+// launch so a machine without the .NET SDK at build time still works.
+if (webviewHostExe) {
+  fs.copyFileSync(webviewHostExe, path.join(ccDist, 'webview-host.exe'));
+}
+// Also fixes a pre-existing gap: the .iss's UninstallDisplayIcon={app}\icon.ico
+// pointed at a file that was never actually shipped into the app folder.
+const ccIconSrc = path.join(ROOT, 'build', 'resources', 'assets', 'icon.ico');
+if (fs.existsSync(ccIconSrc)) fs.copyFileSync(ccIconSrc, path.join(ccDist, 'icon.ico'));
+
 fs.writeFileSync(path.join(ccDist, 'VAMPJRO.bat'),
-  `@echo off\r\ntitle VAMPJRO Control Center\r\ncd /d "%~dp0"\r\nset "VAMPJRO_DATA_DIR=%LOCALAPPDATA%\\VAMPJRO\\Data\\ControlCenter"\r\nif not exist "%VAMPJRO_DATA_DIR%" mkdir "%VAMPJRO_DATA_DIR%"\r\nif exist runtime\\node.exe (\r\n  runtime\\node.exe --max-old-space-size=128 server/index.js\r\n) else (\r\n  node --max-old-space-size=128 server/index.js\r\n)\r\n`,
+  `@echo off\r\ntitle VAMPJRO Control Center\r\ncd /d "%~dp0"\r\nset "VAMPJRO_DATA_DIR=%LOCALAPPDATA%\\VAMPJRO\\Data\\ControlCenter"\r\nif not exist "%VAMPJRO_DATA_DIR%" mkdir "%VAMPJRO_DATA_DIR%"\r\nif exist runtime\\node.exe (set "NODE_EXE=runtime\\node.exe") else (set "NODE_EXE=node")\r\nif exist webview-host.exe (\r\n  start "" webview-host.exe "VAMPJRO Control Center" "http://localhost:3000" "%NODE_EXE%" "--max-old-space-size=128 server/index.js" "%~dp0." "icon.ico"\r\n) else (\r\n  "%NODE_EXE%" --max-old-space-size=128 server/index.js\r\n)\r\n`,
   'utf8');
 
 // Build Control Owner
@@ -230,8 +285,14 @@ if (fs.existsSync(ownerSrc)) {
     path.join(sharedDest, 'protocol.js')
   );
 
+  if (webviewHostExe) {
+    fs.copyFileSync(webviewHostExe, path.join(ownerDist, 'webview-host.exe'));
+  }
+  const ownerIconSrc = path.join(ROOT, 'build', 'resources', 'assets', 'icon-owner.ico');
+  if (fs.existsSync(ownerIconSrc)) fs.copyFileSync(ownerIconSrc, path.join(ownerDist, 'icon-owner.ico'));
+
   fs.writeFileSync(path.join(ownerDist, 'VAMPJRO-Owner.bat'),
-    `@echo off\r\ntitle VAMPJRO Control Owner\r\ncd /d "%~dp0"\r\nif not exist "%LOCALAPPDATA%\\VAMPJRO\\Data\\Owner" mkdir "%LOCALAPPDATA%\\VAMPJRO\\Data\\Owner"\r\nif exist runtime\\node.exe (\r\n  runtime\\node.exe owner/server/index.js\r\n) else (\r\n  node owner/server/index.js\r\n)\r\n`,
+    `@echo off\r\ntitle VAMPJRO Control Owner\r\ncd /d "%~dp0"\r\nif not exist "%LOCALAPPDATA%\\VAMPJRO\\Data\\Owner" mkdir "%LOCALAPPDATA%\\VAMPJRO\\Data\\Owner"\r\nif exist runtime\\node.exe (set "NODE_EXE=runtime\\node.exe") else (set "NODE_EXE=node")\r\nif exist webview-host.exe (\r\n  start "" webview-host.exe "VAMPJRO Control Owner" "http://localhost:5000" "%NODE_EXE%" "owner/server/index.js" "%~dp0." "icon-owner.ico"\r\n) else (\r\n  "%NODE_EXE%" owner/server/index.js\r\n)\r\n`,
     'utf8');
 }
 

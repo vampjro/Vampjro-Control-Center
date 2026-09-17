@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-17T06:42:08.887Z",
+  "timestamp": "2026-09-17T18:37:27.104Z",
   "environment": {
     "node": "v24.11.1",
     "platform": "win32",
@@ -30,7 +30,7 @@
     {
       "status": "PASS",
       "name": "Control Center health",
-      "detail": "v1.0.0, uptime 1605s"
+      "detail": "v1.0.0, uptime 44522s"
     },
     {
       "status": "PASS",
@@ -55,7 +55,7 @@
     {
       "status": "PASS",
       "name": "Pairing creation",
-      "detail": "clientId=zPxt6ssO..."
+      "detail": "clientId=fBl424uc..."
     },
     {
       "status": "PASS",
@@ -110,12 +110,12 @@
     {
       "status": "PASS",
       "name": "Rollout bucket deterministic",
-      "detail": "client+version → bucket 63"
+      "detail": "client+version → bucket 65"
     },
     {
       "status": "PASS",
       "name": "10% rollout distribution",
-      "detail": "7/100 clients selected"
+      "detail": "13/100 clients selected"
     },
     {
       "status": "PASS",
@@ -135,12 +135,12 @@
     {
       "status": "PASS",
       "name": "Client ID generation",
-      "detail": "4XXi2WnaHoig57Y0, Yr4XvoiLXQ9JQ9Fq"
+      "detail": "nAfk70IQDe70xIGW, 2GAXULsFXAdhNq0C"
     },
     {
       "status": "PASS",
       "name": "Pairing code generation",
-      "detail": "603041"
+      "detail": "113130"
     },
     {
       "status": "PASS",
