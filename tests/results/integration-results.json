@@ -1,0 +1,171 @@
+{
+  "timestamp": "2026-09-17T03:32:21.389Z",
+  "environment": {
+    "node": "v24.11.1",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "summary": {
+    "passed": 30,
+    "failed": 0,
+    "blocked": 1,
+    "total": 31
+  },
+  "results": [
+    {
+      "status": "PASS",
+      "name": "Backend startup",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Backend health endpoint",
+      "detail": "v1.0.0"
+    },
+    {
+      "status": "PASS",
+      "name": "Owner startup",
+      "detail": ""
+    },
+    {
+      "status": "BLOCKED",
+      "name": "Control Center health",
+      "detail": "No dev instance running on 3000 (skipped)"
+    },
+    {
+      "status": "PASS",
+      "name": "Backend /client WebSocket connect",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Backend rejects invalid client auth",
+      "detail": "Unknown or revoked client"
+    },
+    {
+      "status": "PASS",
+      "name": "Backend /owner WebSocket connect",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Owner authentication (first setup)",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Pairing creation",
+      "detail": "clientId=sHiccFtt..."
+    },
+    {
+      "status": "PASS",
+      "name": "Client authentication with paired credentials",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Health report accepted",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Client list",
+      "detail": "1 client(s)"
+    },
+    {
+      "status": "PASS",
+      "name": "Client shows as online",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Client detail with health data",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Remote command received by client",
+      "detail": "action=getHealth"
+    },
+    {
+      "status": "PASS",
+      "name": "Remote command result sent",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Revoked client rejected",
+      "detail": "Unknown or revoked client"
+    },
+    {
+      "status": "PASS",
+      "name": "Wrong owner token rejected",
+      "detail": "Invalid token"
+    },
+    {
+      "status": "PASS",
+      "name": "Backend rejects invalid WebSocket paths",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Rollout bucket deterministic",
+      "detail": "client+version → bucket 29"
+    },
+    {
+      "status": "PASS",
+      "name": "10% rollout distribution",
+      "detail": "13/100 clients selected"
+    },
+    {
+      "status": "PASS",
+      "name": "Protocol message create/parse",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Protocol rejects invalid JSON",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Protocol rejects message without type",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Client ID generation",
+      "detail": "hUg4LrCVSx8tYhPQ, HnRaY1UGJbmWWKqZ"
+    },
+    {
+      "status": "PASS",
+      "name": "Pairing code generation",
+      "detail": "098778"
+    },
+    {
+      "status": "PASS",
+      "name": "Feature test setup",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Audit query returns entries",
+      "detail": "1 entries, total=1"
+    },
+    {
+      "status": "PASS",
+      "name": "Command to offline client returns error",
+      "detail": "Client offline"
+    },
+    {
+      "status": "PASS",
+      "name": "Invalid remote action rejected by backend",
+      "detail": "Action not allowed"
+    },
+    {
+      "status": "PASS",
+      "name": "Cleanup",
+      "detail": ""
+    }
+  ]
+}
