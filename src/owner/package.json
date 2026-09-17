@@ -1,0 +1,14 @@
+{
+  "name": "vampjro-control-owner",
+  "version": "1.0.0",
+  "description": "VAMPJRO Control Owner — Admin Application",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0"
+  }
+}

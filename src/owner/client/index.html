@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>VAMPJRO Control Owner</title>
+<style>
+  :root {
+    --bg: #000;
+    --surface: #1c1c1e;
+    --surface2: #2c2c2e;
+    --surface3: #3a3a3c;
+    --text: #fff;
+    --text2: #8e8e93;
+    --accent: #6366f1;
+    --accent-dim: rgba(99,102,241,.3);
+    --green: #30d158;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family: -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',system-ui,sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100dvh;
+    user-select: none;
+  }
+
+  .header {
+    padding: 16px;
+    border-bottom: 1px solid #222;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header .badge {
+    font-size: 11px; padding: 3px 8px; border-radius: 8px;
+    background: var(--accent-dim); color: var(--accent); font-weight: 600;
+  }
+
+  .status-bar {
+    padding: 8px 16px;
+    font-size: 12px; color: var(--text2);
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red); flex-shrink: 0;
+  }
+  .status-dot.connected { background: var(--green); }
+
+  /* Auth screen */
+  #auth-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 80vh; padding: 24px; gap: 16px;
+  }
+  #auth-screen h2 { font-size: 24px; font-weight: 700; }
+  #auth-screen p { color: var(--text2); font-size: 14px; text-align: center; max-width: 300px; }
+  #auth-screen input {
+    width: 100%; max-width: 300px; padding: 14px 16px;
+    background: var(--surface); border: 1px solid #333; border-radius: 12px;
+    color: var(--text); font-size: 16px; outline: none;
+  }
+  #auth-screen input:focus { border-color: var(--accent); }
+  #auth-screen button {
+    width: 100%; max-width: 300px; padding: 14px;
+    background: var(--accent); border: none; border-radius: 12px;
+    color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+  }
+  #auth-screen button:active { opacity: 0.8; }
+  .auth-error { color: var(--red); font-size: 13px; }
+
+  /* Dashboard */
+  #dashboard { display: none; }
+  .section { padding: 16px; }
+  .section-title {
+    font-size: 13px; color: var(--text2); text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600;
+  }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface); border-radius: 12px; padding: 12px;
+    text-align: center;
+  }
+  .stat-value { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .client-list { display: flex; flex-direction: column; gap: 8px; }
+  .client-card {
+    background: var(--surface); border-radius: 12px; padding: 14px;
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+  }
+  .client-card:active { background: var(--surface2); }
+  .client-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .client-dot.online { background: var(--green); }
+  .client-dot.offline { background: var(--text2); }
+  .client-dot.error { background: var(--red); }
+  .client-dot.updating { background: var(--orange); }
+  .client-info { flex: 1; min-width: 0; }
+  .client-name {
+    font-size: 15px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .client-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .client-actions { display: flex; gap: 6px; }
+  .client-actions button {
+    padding: 6px 10px; border-radius: 8px; border: none;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .btn-info { background: var(--accent-dim); color: var(--accent); }
+  .btn-danger { background: rgba(255,69,58,.15); color: var(--red); }
+
+  .pair-section {
+    background: var(--surface); border-radius: 12px; padding: 16px;
+    margin-top: 12px;
+  }
+  .pair-section h3 { font-size: 15px; margin-bottom: 12px; }
+  .pair-row { display: flex; gap: 8px; }
+  .pair-row input {
+    flex: 1; padding: 10px 12px;
+    background: var(--surface2); border: 1px solid #333; border-radius: 8px;
+    color: var(--text); font-size: 14px; outline: none;
+  }
+  .pair-row button {
+    padding: 10px 16px; background: var(--accent); border: none;
+    border-radius: 8px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+
+  .pairing-result {
+    margin-top: 12px; padding: 12px;
+    background: rgba(48,209,88,.1); border-radius: 8px;
+    font-size: 13px; display: none;
+  }
+  .pairing-result code {
+    display: block; margin-top: 6px; padding: 8px;
+    background: var(--surface2); border-radius: 6px;
+    font-family: 'SF Mono', monospace; font-size: 12px;
+    word-break: break-all; user-select: all;
+  }
+
+  /* Detail overlay */
+  .overlay {
+    position: fixed; inset: 0; background: var(--bg);
+    z-index: 100; display: none; overflow-y: auto;
+    padding: 16px; padding-bottom: calc(16px + var(--safe-b));
+  }
+  .overlay.show { display: block; }
+  .overlay-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  }
+  .overlay-back {
+    background: none; border: none; color: var(--accent);
+    font-size: 16px; cursor: pointer; padding: 4px;
+  }
+  .overlay-title { font-size: 20px; font-weight: 700; }
+
+  .detail-row {
+    display: flex; justify-content: space-between; padding: 12px 0;
+    border-bottom: 1px solid #1a1a1a; font-size: 14px;
+  }
+  .detail-label { color: var(--text2); }
+
+  .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .action-buttons button {
+    width: 100%; padding: 14px; border-radius: 12px; border: none;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-destructive { background: rgba(255,69,58,.15); color: var(--red); }
+
+  /* Audit log */
+  .audit-entry {
+    padding: 10px 0; border-bottom: 1px solid #1a1a1a;
+    font-size: 13px;
+  }
+  .audit-action { font-weight: 600; }
+  .audit-time { color: var(--text2); font-size: 11px; }
+
+  .empty-state {
+    text-align: center; padding: 40px 16px;
+    color: var(--text2); font-size: 14px;
+  }
+
+  .toast {
+    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface2); color: var(--text);
+    padding: 10px 20px; border-radius: 20px; font-size: 14px;
+    opacity: 0; transition: opacity .3s, transform .3s; z-index: 200; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Release Manager */
+  .field-label { font-size: 12px; color: var(--text2); margin: 10px 0 4px; }
+  .field-label:first-child { margin-top: 0; }
+  .form-input {
+    width: 100%; padding: 10px 12px;
+    background: var(--surface2); border: 1px solid #333; border-radius: 8px;
+    color: var(--text); font-size: 14px; outline: none; font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  textarea.form-input { resize: vertical; min-height: 60px; }
+  .form-row { display: flex; gap: 8px; }
+  .form-row .form-input { flex: 1; }
+  .btn-block {
+    width: 100%; padding: 12px; margin-top: 12px;
+    background: var(--accent); border: none; border-radius: 10px;
+    color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .btn-block.secondary { background: var(--surface2); color: var(--text); }
+  .btn-block:disabled { opacity: 0.5; cursor: default; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--text2); }
+  .conn-status { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; display: none; }
+  .conn-status.ok { display: block; background: rgba(48,209,88,.1); color: var(--green); }
+  .conn-status.err { display: block; background: rgba(255,69,58,.1); color: var(--red); }
+  .progress-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .progress-item {
+    display: flex; align-items: center; gap: 8px; font-size: 13px;
+    padding: 8px 10px; border-radius: 8px; background: var(--surface2);
+  }
+  .progress-icon { flex-shrink: 0; width: 16px; text-align: center; }
+  .progress-item.ok .progress-icon { color: var(--green); }
+  .progress-item.err .progress-icon { color: var(--red); }
+  .progress-item.pending .progress-icon { color: var(--text2); }
+  .history-item {
+    padding: 12px; border-radius: 10px; background: var(--surface); margin-bottom: 8px;
+  }
+  .history-head { display: flex; justify-content: space-between; align-items: center; }
+  .history-version { font-weight: 700; font-size: 14px; }
+  .history-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+  .history-status.success { background: rgba(48,209,88,.15); color: var(--green); }
+  .history-status.partial { background: rgba(255,159,10,.15); color: var(--orange); }
+  .history-status.failed { background: rgba(255,69,58,.15); color: var(--red); }
+  .history-date { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .subsection-title { font-size: 14px; font-weight: 600; margin: 16px 0 8px; }
+  .subsection-title:first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>VAMPJRO Owner</h1>
+  <span class="badge">ADMIN</span>
+</div>
+
+<div class="status-bar">
+  <div class="status-dot" id="backendDot"></div>
+  <span id="backendStatus">Backend: disconnesso</span>
+</div>
+
+<div id="auth-screen">
+  <h2>Autenticazione</h2>
+  <p>Inserisci il token Owner per accedere al pannello di controllo</p>
+  <input type="password" id="tokenInput" placeholder="Token Owner">
+  <button onclick="authenticate()">Accedi</button>
+  <div class="auth-error" id="authError"></div>
+</div>
+
+<div id="dashboard">
+  <div class="section">
+    <div class="section-title">Panoramica</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="totalClients">0</div>
+        <div class="stat-label">Client Totali</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="onlineClients" style="color:var(--green)">0</div>
+        <div class="stat-label">Online</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="offlineClients" style="color:var(--text2)">0</div>
+        <div class="stat-label">Offline</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Client Registrati</div>
+    <div class="client-list" id="clientList">
+      <div class="empty-state">Nessun client registrato</div>
+    </div>
+
+    <div class="pair-section">
+      <h3>Nuovo Pairing</h3>
+      <div class="pair-row">
+        <input type="text" id="pairName" placeholder="Nome client">
+        <button onclick="createPairing()">Crea</button>
+      </div>
+      <div class="pairing-result" id="pairingResult">
+        <strong>Credenziali di pairing:</strong>
+        <code id="pairingCode"></code>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Log di Audit</div>
+    <div id="auditLog">
+      <div class="empty-state">Nessun evento registrato</div>
+    </div>
+  </div>
+
+  <div class="section" id="releaseSection" style="display:none">
+    <div class="section-title">Release Manager</div>
+
+    <div class="subsection-title">Configurazione GitHub</div>
+    <div class="field-label">Owner GitHub</div>
+    <input class="form-input" id="relOwner" placeholder="es. vampjro">
+    <div class="field-label">Repository</div>
+    <input class="form-input" id="relRepo" placeholder="es. Vampjro-Control-Center">
+    <div class="field-label">Gist ID (manifest update)</div>
+    <input class="form-input" id="relGist" placeholder="Gist ID">
+    <div class="field-label">GitHub Token <span id="relTokenStatus" style="color:var(--text2)"></span></div>
+    <input class="form-input" type="password" id="relToken" placeholder="Lascia vuoto per non modificarlo">
+    <div class="form-row">
+      <button class="btn-block secondary" onclick="saveReleaseConfig()">Salva</button>
+      <button class="btn-block secondary" onclick="testReleaseConnection()">Test Connessione</button>
+    </div>
+    <div class="conn-status" id="relConnStatus"></div>
+
+    <div class="subsection-title">Pubblica Release</div>
+    <div class="field-label">Versione</div>
+    <input class="form-input" id="relVersion" placeholder="es. 1.1.0">
+    <div class="field-label">Note di rilascio</div>
+    <textarea class="form-input" id="relNotes" placeholder="Cosa è cambiato in questa versione..."></textarea>
+    <div class="checkbox-row">
+      <input type="checkbox" id="relDryRun"> <label for="relDryRun">Dry run (valida e compila senza pubblicare)</label>
+    </div>
+    <button class="btn-block" id="relPublishBtn" onclick="publishRelease()">Pubblica Release</button>
+    <div class="progress-list" id="relProgress"></div>
+
+    <div class="subsection-title">Storico Release</div>
+    <div id="relHistory"><div class="empty-state">Nessuna release pubblicata</div></div>
+  </div>
+</div>
+
+<div class="overlay" id="clientDetail">
+  <div class="overlay-header">
+    <button class="overlay-back" onclick="closeDetail()">&larr;</button>
+    <span class="overlay-title" id="detailName">Client</span>
+  </div>
+  <div id="detailContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  const WS_URL = `ws://${location.host}`;
+  let ws = null;
+  let reconnectDelay = 1000;
+  let clients = [];
+
+  function connect() {
+    try { ws = new WebSocket(WS_URL); } catch(_) { scheduleReconnect(); return; }
+
+    ws.onopen = () => {
+      reconnectDelay = 1000;
+      const savedToken = localStorage.getItem('ownerToken');
+      if (savedToken) {
+        ws.send(JSON.stringify({ type: 'setToken', token: savedToken }));
+      }
+    };
+
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        handleMessage(msg);
+      } catch(_) {}
+    };
+
+    ws.onclose = () => {
+      updateBackendStatus(false);
+      scheduleReconnect();
+    };
+    ws.onerror = () => {};
+  }
+
+  function scheduleReconnect() {
+    setTimeout(() => {
+      reconnectDelay = Math.min(reconnectDelay * 1.5, 15000);
+      connect();
+    }, reconnectDelay);
+  }
+
+  function send(msg) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(msg));
+    }
+  }
+
+  function handleMessage(msg) {
+    switch (msg.type) {
+      case 'status':
+        updateBackendStatus(msg.backendConnected);
+        if (msg.backendConnected) showDashboard();
+        break;
+      case 'backendConnected':
+        updateBackendStatus(true);
+        showDashboard();
+        refreshClients();
+        refreshAudit();
+        break;
+      case 'backendDisconnected':
+        updateBackendStatus(false);
+        break;
+      case 'backendAuthFailed':
+        document.getElementById('authError').textContent = msg.error || 'Token non valido';
+        break;
+      case 'ownerAuthOk':
+        showDashboard();
+        refreshClients();
+        refreshAudit();
+        break;
+      case 'clientListResult':
+        clients = msg.clients || [];
+        renderClients();
+        break;
+      case 'clientStatusResult':
+        renderClientDetail(msg.client);
+        break;
+      case 'pairSuccess':
+        showPairingResult(msg);
+        refreshClients();
+        break;
+      case 'remoteResult':
+      case 'remoteError':
+        toast(msg.type === 'remoteResult' ? 'Comando eseguito' : `Errore: ${msg.error}`);
+        break;
+      case 'auditQueryResult':
+        renderAuditLog(msg.entries || [], msg.total || 0);
+        break;
+      case 'releaseStarted':
+        relProgressSteps = [];
+        renderReleaseProgress();
+        setPublishBusy(true);
+        break;
+      case 'releaseProgress':
+        relProgressSteps.push(msg);
+        renderReleaseProgress();
+        break;
+      case 'releaseFinished':
+        setPublishBusy(false);
+        toast(msg.result.status === 'success' ? 'Release pubblicata' : `Release: ${msg.result.status}`);
+        refreshReleaseHistory();
+        break;
+    }
+  }
+
+  function updateBackendStatus(connected) {
+    const dot = document.getElementById('backendDot');
+    const label = document.getElementById('backendStatus');
+    dot.className = 'status-dot' + (connected ? ' connected' : '');
+    label.textContent = connected ? 'Backend: connesso' : 'Backend: disconnesso';
+  }
+
+  window.authenticate = function() {
+    const token = document.getElementById('tokenInput').value.trim();
+    if (!token) return;
+    localStorage.setItem('ownerToken', token);
+    send({ type: 'setToken', token });
+    document.getElementById('authError').textContent = '';
+  };
+
+  function showDashboard() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    initReleaseSection();
+  }
+
+  function refreshClients() {
+    send({ type: 'clientList' });
+  }
+
+  function renderClients() {
+    const list = document.getElementById('clientList');
+    const total = clients.length;
+    const online = clients.filter(c => c.online && !c.revoked).length;
+    const offline = total - online;
+
+    document.getElementById('totalClients').textContent = total;
+    document.getElementById('onlineClients').textContent = online;
+    document.getElementById('offlineClients').textContent = offline;
+
+    if (total === 0) {
+      list.innerHTML = '<div class="empty-state">Nessun client registrato</div>';
+      return;
+    }
+
+    list.innerHTML = clients.map(c => {
+      const stateClass = c.revoked ? 'offline' : (c.online ? 'online' : c.state || 'offline');
+      const lastSeen = c.last_seen ? new Date(c.last_seen).toLocaleString('it-IT') : 'mai';
+      return `<div class="client-card" onclick="showClientDetail('${c.id}')">
+        <div class="client-dot ${stateClass}"></div>
+        <div class="client-info">
+          <div class="client-name">${esc(c.name)}${c.revoked ? ' (revocato)' : ''}</div>
+          <div class="client-meta">v${c.version || '?'} &middot; ${lastSeen}</div>
+        </div>
+        <div class="client-actions">
+          <button class="btn-info" onclick="event.stopPropagation();requestHealth('${c.id}')">Health</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.showClientDetail = function(clientId) {
+    send({ type: 'clientStatus', clientId });
+    document.getElementById('clientDetail').classList.add('show');
+  };
+
+  function renderClientDetail(client) {
+    if (!client) return;
+    document.getElementById('detailName').textContent = client.name;
+    const lastSeen = client.lastSeen ? new Date(client.lastSeen).toLocaleString('it-IT') : 'mai';
+    const pairedAt = new Date(client.pairedAt).toLocaleString('it-IT');
+
+    let healthHtml = '';
+    if (client.lastHealth) {
+      const h = client.lastHealth;
+      healthHtml = `
+        <div class="detail-row"><span class="detail-label">CPU Load</span><span>${h.cpu?.toFixed(1) || '?'}%</span></div>
+        <div class="detail-row"><span class="detail-label">RAM Libera</span><span>${h.memFree ? (h.memFree / 1073741824).toFixed(1) + ' GB' : '?'}</span></div>
+        <div class="detail-row"><span class="detail-label">Uptime</span><span>${h.uptime ? Math.round(h.uptime / 60) + ' min' : '?'}</span></div>
+        <div class="detail-row"><span class="detail-label">Node</span><span>${h.nodeVersion || '?'}</span></div>
+      `;
+    }
+
+    document.getElementById('detailContent').innerHTML = `
+      <div class="detail-row"><span class="detail-label">ID</span><span style="font-family:monospace;font-size:12px">${client.id}</span></div>
+      <div class="detail-row"><span class="detail-label">Stato</span><span>${client.online ? '<span style="color:var(--green)">Online</span>' : 'Offline'}</span></div>
+      <div class="detail-row"><span class="detail-label">Versione</span><span>v${client.version || '?'}</span></div>
+      <div class="detail-row"><span class="detail-label">Canale</span><span>${client.channel}</span></div>
+      <div class="detail-row"><span class="detail-label">Ultimo contatto</span><span>${lastSeen}</span></div>
+      <div class="detail-row"><span class="detail-label">Pairing</span><span>${pairedAt}</span></div>
+      ${healthHtml}
+      <div class="action-buttons">
+        <button class="btn-primary" onclick="requestHealth('${client.id}')">Aggiorna Health</button>
+        <button class="btn-primary" onclick="remoteCommand('${client.id}','getSystemStats')">System Stats</button>
+        <button class="btn-primary" onclick="remoteCommand('${client.id}','getProcesses')">Processi</button>
+        <button class="btn-primary" onclick="remoteCommand('${client.id}','getLogs')">Log Errori</button>
+        ${!client.revoked ? `<button class="btn-destructive" onclick="revokeClient('${client.id}')">Revoca Pairing</button>` : ''}
+      </div>
+    `;
+  }
+
+  window.closeDetail = function() {
+    document.getElementById('clientDetail').classList.remove('show');
+  };
+
+  window.requestHealth = function(clientId) {
+    send({ type: 'remoteCommand', clientId, action: 'getHealth', requestId: 'h_' + Date.now() });
+    toast('Health richiesto...');
+  };
+
+  window.remoteCommand = function(clientId, action) {
+    send({ type: 'remoteCommand', clientId, action, requestId: 'r_' + Date.now() });
+    toast('Comando inviato...');
+  };
+
+  window.revokeClient = function(clientId) {
+    if (!confirm('Revocare il pairing di questo client?')) return;
+    send({ type: 'unpair', clientId });
+    toast('Client revocato');
+    setTimeout(() => { closeDetail(); refreshClients(); }, 500);
+  };
+
+  window.createPairing = function() {
+    const name = document.getElementById('pairName').value.trim();
+    if (!name) { toast('Inserisci un nome'); return; }
+    send({ type: 'pairRequest', name, channel: 'stable' });
+  };
+
+  function showPairingResult(result) {
+    const el = document.getElementById('pairingResult');
+    document.getElementById('pairingCode').textContent =
+      `Client ID: ${result.clientId}\nSecret: ${result.secret}\nPairing Code: ${result.pairingCode}`;
+    el.style.display = 'block';
+    document.getElementById('pairName').value = '';
+  }
+
+  function toast(text) {
+    const el = document.getElementById('toast');
+    el.textContent = text;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2000);
+  }
+
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function refreshAudit() {
+    send({ type: 'auditQuery', limit: 50 });
+  }
+
+  function renderAuditLog(entries, total) {
+    const el = document.getElementById('auditLog');
+    if (!entries.length) {
+      el.innerHTML = '<div class="empty-state">Nessun evento registrato</div>';
+      return;
+    }
+    const actionLabels = {
+      client_paired: 'Client Paired',
+      client_unpaired: 'Client Unpaired',
+      remote_command_sent: 'Remote Command',
+      update_pushed: 'Update Pushed',
+      update_installed: 'Update Installed',
+      owner_login: 'Owner Login',
+      settings_changed: 'Settings Changed'
+    };
+    el.innerHTML = entries.map(e => {
+      const time = new Date(e.created_at).toLocaleString('it-IT');
+      const label = actionLabels[e.action] || e.action;
+      let detail = '';
+      let d = e.data;
+      if (typeof d === 'string') { try { d = JSON.parse(d); } catch { d = null; } }
+      if (d) {
+        if (d.clientId) detail += ' &middot; ' + esc(d.clientId.slice(0, 8));
+        if (d.action) detail += ' &middot; ' + esc(d.action);
+        if (d.failed) detail += ' &middot; <span style="color:var(--red)">failed</span>';
+        if (d.ip) detail += ' &middot; ' + esc(d.ip);
+      }
+      return `<div class="audit-entry"><span class="audit-action">${esc(label)}</span>${detail}<div class="audit-time">${time}</div></div>`;
+    }).join('') + (total > entries.length ? `<div style="text-align:center;padding:12px;color:var(--text2);font-size:12px">${total} eventi totali</div>` : '');
+  }
+
+  // ---------- Release Manager ----------
+  let relProgressSteps = [];
+  let relInitialized = false;
+
+  const STEP_LABELS = {
+    'validate-connection': 'Verifica connessione GitHub/Gist',
+    'validate-version': 'Verifica versione',
+    'tests': 'Esecuzione test',
+    'bump-version': 'Aggiornamento numero versione',
+    'build': 'Build e packaging',
+    'hash': 'Calcolo SHA-256',
+    'dry-run': 'Dry run completato',
+    'git-tag-push': 'Tag Git e push',
+    'github-release': 'Creazione GitHub Release',
+    'upload-asset': 'Upload installer',
+    'verify-asset': 'Verifica integrità asset',
+    'update-gist': 'Aggiornamento Gist',
+    'verify-gist': 'Verifica Gist pubblica'
+  };
+
+  async function initReleaseSection() {
+    if (relInitialized) return;
+    try {
+      const avail = await fetch('/api/release/available').then(r => r.json());
+      if (!avail.available) return; // not running from a dev checkout: leave hidden
+      relInitialized = true;
+      document.getElementById('releaseSection').style.display = 'block';
+      await loadReleaseConfig();
+      await refreshReleaseHistory();
+    } catch (_) { /* leave hidden on any error */ }
+  }
+
+  async function loadReleaseConfig() {
+    const cfg = await fetch('/api/release/config').then(r => r.json());
+    document.getElementById('relOwner').value = cfg.githubOwner || '';
+    document.getElementById('relRepo').value = cfg.githubRepository || '';
+    document.getElementById('relGist').value = cfg.gistId || '';
+    document.getElementById('relTokenStatus').textContent = cfg.hasToken ? '(configurato)' : '(non configurato)';
+  }
+
+  window.saveReleaseConfig = async function() {
+    const body = {
+      githubOwner: document.getElementById('relOwner').value.trim(),
+      githubRepository: document.getElementById('relRepo').value.trim(),
+      gistId: document.getElementById('relGist').value.trim(),
+      githubToken: document.getElementById('relToken').value.trim()
+    };
+    await fetch('/api/release/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    document.getElementById('relToken').value = '';
+    await loadReleaseConfig();
+    toast('Configurazione salvata');
+  };
+
+  window.testReleaseConnection = async function() {
+    const el = document.getElementById('relConnStatus');
+    el.className = 'conn-status';
+    el.textContent = 'Verifica in corso...';
+    el.style.display = 'block';
+    try {
+      const result = await fetch('/api/release/test-connection').then(r => r.json());
+      el.className = 'conn-status ' + (result.ok ? 'ok' : 'err');
+      el.textContent = result.ok
+        ? `OK — ${result.data.login} · ${result.data.repoUrl} · ${result.data.gistUrl}`
+        : result.message;
+    } catch (err) {
+      el.className = 'conn-status err';
+      el.textContent = 'Errore: ' + err.message;
+    }
+  };
+
+  function setPublishBusy(busy) {
+    const btn = document.getElementById('relPublishBtn');
+    btn.disabled = busy;
+    btn.textContent = busy ? 'Pubblicazione in corso...' : 'Pubblica Release';
+  }
+
+  window.publishRelease = async function() {
+    const version = document.getElementById('relVersion').value.trim();
+    if (!version) { toast('Inserisci una versione'); return; }
+    const releaseNotes = document.getElementById('relNotes').value.trim();
+    const dryRun = document.getElementById('relDryRun').checked;
+    relProgressSteps = [];
+    renderReleaseProgress();
+    setPublishBusy(true);
+    try {
+      const res = await fetch('/api/release/publish', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ version, releaseNotes, dryRun })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast(err.error || 'Pubblicazione fallita');
+      }
+    } catch (err) {
+      toast('Errore: ' + err.message);
+    } finally {
+      setPublishBusy(false);
+    }
+  };
+
+  function renderReleaseProgress() {
+    const el = document.getElementById('relProgress');
+    el.innerHTML = relProgressSteps.map(s => {
+      const cls = s.ok ? 'ok' : 'err';
+      const icon = s.ok ? '&check;' : '&times;';
+      const label = STEP_LABELS[s.step] || s.step;
+      return `<div class="progress-item ${cls}"><span class="progress-icon">${icon}</span><span>${esc(label)}: ${esc(s.message || '')}</span></div>`;
+    }).join('');
+  }
+
+  async function refreshReleaseHistory() {
+    const history = await fetch('/api/release/history').then(r => r.json()).catch(() => []);
+    const el = document.getElementById('relHistory');
+    if (!history.length) {
+      el.innerHTML = '<div class="empty-state">Nessuna release pubblicata</div>';
+      return;
+    }
+    el.innerHTML = history.map(h => {
+      const date = new Date(h.date).toLocaleString('it-IT');
+      const link = h.releaseUrl ? ` &middot; <a href="${esc(h.releaseUrl)}" target="_blank" style="color:var(--accent)">GitHub</a>` : '';
+      return `<div class="history-item">
+        <div class="history-head">
+          <span class="history-version">v${esc(h.version)}</span>
+          <span class="history-status ${esc(h.status)}">${esc(h.status)}</span>
+        </div>
+        <div class="history-date">${date}${link}</div>
+      </div>`;
+    }).join('');
+  }
+
+  setInterval(refreshClients, 15000);
+  setInterval(refreshAudit, 30000);
+
+  connect();
+})();
+</script>
+</body>
+</html>
